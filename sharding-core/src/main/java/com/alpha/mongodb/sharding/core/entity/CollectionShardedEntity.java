@@ -1,5 +1,5 @@
 package com.alpha.mongodb.sharding.core.entity;
 
-public interface MongoDBCollectionShardedEntity extends MongoDBShardedEntity {
+public interface CollectionShardedEntity extends ShardedEntity {
     String getCollectionHint();
 }

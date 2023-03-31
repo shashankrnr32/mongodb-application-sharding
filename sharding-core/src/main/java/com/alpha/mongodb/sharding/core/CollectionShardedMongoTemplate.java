@@ -1,6 +1,7 @@
 package com.alpha.mongodb.sharding.core;
 
-import com.alpha.mongodb.sharding.core.entity.MongoDBCollectionShardedEntity;
+import com.alpha.mongodb.sharding.core.configuration.CollectionShardingOptions;
+import com.alpha.mongodb.sharding.core.entity.CollectionShardedEntity;
 import com.alpha.mongodb.sharding.core.exception.UnresolvableCollectionShardException;
 import com.alpha.mongodb.sharding.core.hint.ShardingHint;
 import com.alpha.mongodb.sharding.core.hint.ShardingHintManager;
@@ -10,8 +11,6 @@ import com.mongodb.client.model.CountOptions;
 import com.mongodb.client.model.EstimatedDocumentCountOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
-import lombok.Getter;
-import lombok.Setter;
 import org.apache.commons.collections.CollectionUtils;
 import org.bson.Document;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
@@ -24,7 +23,6 @@ import org.springframework.data.mongodb.core.query.UpdateDefinition;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -37,20 +35,16 @@ import java.util.Optional;
  */
 public class CollectionShardedMongoTemplate extends ShardedMongoTemplate {
 
-    @Getter
-    @Setter
-    private List<String> allShardHints = new ArrayList<>();
-
-    public CollectionShardedMongoTemplate(MongoClient mongoClient, String databaseName) {
-        super(mongoClient, databaseName);
+    public CollectionShardedMongoTemplate(MongoClient mongoClient, String databaseName, CollectionShardingOptions shardingOptions) {
+        super(mongoClient, databaseName, shardingOptions);
     }
 
-    public CollectionShardedMongoTemplate(MongoDatabaseFactory mongoDbFactory) {
-        super(mongoDbFactory);
+    public CollectionShardedMongoTemplate(MongoDatabaseFactory mongoDbFactory, CollectionShardingOptions shardingOptions) {
+        super(mongoDbFactory, shardingOptions);
     }
 
-    public CollectionShardedMongoTemplate(MongoDatabaseFactory mongoDbFactory, MongoConverter mongoConverter) {
-        super(mongoDbFactory, mongoConverter);
+    public CollectionShardedMongoTemplate(MongoDatabaseFactory mongoDbFactory, MongoConverter mongoConverter, CollectionShardingOptions shardingOptions) {
+        super(mongoDbFactory, mongoConverter, shardingOptions);
     }
 
     @Override
@@ -109,21 +103,21 @@ public class CollectionShardedMongoTemplate extends ShardedMongoTemplate {
         return super.doUpdate(resolveCollectionNameWithoutEntityContext(collectionName), query, update, entityClass, upsert, multi);
     }
 
-    public long countFromAllShards(Query query, Class<?> entityClass) {
-        return this.allShardHints.stream().mapToLong(shardHint -> count(query, entityClass)).sum();
+    public long countFromAll(Query query, Class<?> entityClass) {
+        return ((CollectionShardingOptions) this.getShardingOptions()).getCollectionHints().stream().mapToLong(shardHint -> count(query, entityClass)).sum();
     }
 
-    public long countFromAllShards(Query query, String collectionName) {
-        return this.allShardHints.stream().mapToLong(shardHint -> count(query, collectionName)).sum();
+    public long countFromAll(Query query, String collectionName) {
+        return ((CollectionShardingOptions) this.getShardingOptions()).getCollectionHints().stream().mapToLong(shardHint -> count(query, collectionName)).sum();
     }
 
-    public long countFromAllShards(Query query, @Nullable Class<?> entityClass, String collectionName) {
-        return this.allShardHints.stream().mapToLong(shardHint -> count(query, entityClass, collectionName)).sum();
+    public long countFromAll(Query query, @Nullable Class<?> entityClass, String collectionName) {
+        return ((CollectionShardingOptions) this.getShardingOptions()).getCollectionHints().stream().mapToLong(shardHint -> count(query, entityClass, collectionName)).sum();
     }
 
     @Override
     public long estimatedCountFromAllShards(String collectionName) {
-        return this.allShardHints.stream().mapToLong(shardHint -> estimatedCount(collectionName)).sum();
+        return ((CollectionShardingOptions) this.getShardingOptions()).getCollectionHints().stream().mapToLong(shardHint -> estimatedCount(collectionName)).sum();
     }
 
     @Override
@@ -156,10 +150,10 @@ public class CollectionShardedMongoTemplate extends ShardedMongoTemplate {
     }
 
     @NonNull
-    private <T> String resolveCollectionNameWithEntityContext(final String collectionName, final T objectToSave) {
+    private <T> String resolveCollectionNameWithEntityContext(final String collectionName, final T entity) {
         String resolvedCollectionName;
-        if (objectToSave instanceof MongoDBCollectionShardedEntity) {
-            String hint = ((MongoDBCollectionShardedEntity) objectToSave).getCollectionHint();
+        if (entity instanceof CollectionShardedEntity) {
+            String hint = ((CollectionShardedEntity) entity).getCollectionHint();
             resolvedCollectionName = resolveName(collectionName, hint);
         } else {
             Optional<ShardingHint> hint = ShardingHintManager.get();
