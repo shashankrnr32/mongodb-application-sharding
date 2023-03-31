@@ -12,8 +12,10 @@
     <artifactId>sharding-core</artifactId>
 
     <properties>
-        <maven.compiler.source>9</maven.compiler.source>
-        <maven.compiler.target>9</maven.compiler.target>
+        <maven.compiler.source>${project.java.version}</maven.compiler.source>
+        <maven.compiler.target>${project.java.version}</maven.compiler.target>
+        <spring.data.mongodb.version>3.3.10</spring.data.mongodb.version>
+        <mongodb.driver.version>4.4.2</mongodb.driver.version>
     </properties>
 
     <dependencies>
@@ -21,7 +23,7 @@
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-mongodb</artifactId>
-            <version>4.0.4</version>
+            <version>${spring.data.mongodb.version}</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
         <dependency>
@@ -35,12 +37,10 @@
             <artifactId>commons-collections</artifactId>
             <version>3.2.2</version>
         </dependency>
-
-        <!-- https://mvnrepository.com/artifact/org.mongodb/mongodb-java-driver -->
         <dependency>
             <groupId>org.mongodb</groupId>
-            <artifactId>mongo-java-driver</artifactId>
-            <version>3.12.12</version>
+            <artifactId>mongodb-driver-sync</artifactId>
+            <version>${mongodb.driver.version}</version>
         </dependency>
 
 

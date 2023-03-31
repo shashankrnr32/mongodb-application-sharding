@@ -1,0 +1,38 @@
+package com.alpha.mongodb.sharding.example.configuration;
+
+import com.alpha.mongodb.sharding.core.CollectionShardedMongoTemplate;
+import com.alpha.mongodb.sharding.core.configuration.CollectionShardingOptions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
+import org.springframework.data.mongodb.MongoDatabaseFactory;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory;
+
+import java.util.stream.IntStream;
+
+@Configuration
+public class CollectionShardedMongoConfiguration {
+
+    private static final String SPRING_MONGO_DB_URI_COLLECTION_SHARDED = "spring.mongodb.sharded.collection.uri";
+
+    @Autowired
+    private Environment environment;
+
+    @Bean
+    public MongoDatabaseFactory collectionShardedMongoDbFactory() {
+        return new SimpleMongoClientDatabaseFactory(environment.getProperty(SPRING_MONGO_DB_URI_COLLECTION_SHARDED));
+    }
+
+    @Bean("collectionShardedMongoTemplate")
+    public MongoTemplate collectionShardedMongoTemplate() {
+        CollectionShardingOptions shardingOptions =
+                CollectionShardingOptions.withIntegerStreamHints(IntStream.range(0, 3));
+
+        return new CollectionShardedMongoTemplate(
+                collectionShardedMongoDbFactory(), shardingOptions);
+    }
+
+
+}
