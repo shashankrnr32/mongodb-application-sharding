@@ -8,7 +8,7 @@ strategies.
 
 Application Sharding Strategies supported by the library
 
-1. [Collection](#Collection Sharding Strategy)
+1. [Collection](#collection-sharding-strategy)
 2. Database
 3. Composite
 
