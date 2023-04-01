@@ -142,14 +142,14 @@ public class CollectionShardedMongoTemplate extends ShardedMongoTemplate {
     }
 
     public boolean collectionExists(String collectionName, final String collectionHint) {
-        return super.collectionExists(resolveName(collectionName, collectionHint));
+        return super.collectionExists(getShardingOptions().resolveCollectionName(collectionName, collectionHint));
     }
 
     @Override
     protected String resolveCollectionNameWithoutEntityContext(String collectionName) throws UnresolvableCollectionShardException {
         String hint = resolveCollectionHintWithoutEntityContext();
         validateCollectionHint(collectionName, hint);
-        return resolveName(collectionName, hint);
+        return getShardingOptions().resolveCollectionName(collectionName, hint);
     }
 
     @NonNull
@@ -158,13 +158,13 @@ public class CollectionShardedMongoTemplate extends ShardedMongoTemplate {
         if (entity instanceof CollectionShardedEntity) {
             String hint = ((CollectionShardedEntity) entity).resolveCollectionHint();
             validateCollectionHint(collectionName, hint);
-            resolvedCollectionName = resolveName(collectionName, hint);
+            resolvedCollectionName = getShardingOptions().resolveCollectionName(collectionName, hint);
         } else {
             Optional<ShardingHint> shardingHint = ShardingHintManager.get();
             if (shardingHint.isPresent() && null != shardingHint.get().getCollectionHint()) {
                 String hint = shardingHint.get().getCollectionHint();
                 validateCollectionHint(collectionName, hint);
-                resolvedCollectionName = resolveName(collectionName, hint);
+                resolvedCollectionName = getShardingOptions().resolveCollectionName(collectionName, hint);
             } else {
                 throw new UnresolvableCollectionShardException();
             }

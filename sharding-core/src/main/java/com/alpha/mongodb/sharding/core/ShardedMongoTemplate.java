@@ -11,11 +11,15 @@ import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 import java.util.Optional;
 
+/**
+ * Abstract Base Sharded Mongo Template
+ *
+ * @author Shashank Sharma
+ */
 public abstract class ShardedMongoTemplate extends MongoTemplate {
 
     @Getter
@@ -34,14 +38,6 @@ public abstract class ShardedMongoTemplate extends MongoTemplate {
     public ShardedMongoTemplate(MongoDatabaseFactory mongoDbFactory, MongoConverter mongoConverter, final ShardingOptions shardingOptions) {
         super(mongoDbFactory, mongoConverter);
         this.shardingOptions = shardingOptions;
-    }
-
-    protected String resolveName(@NonNull final String name, @NonNull final String hint) {
-        return String.format("%s%s%s", name, shardingOptions.getShardSeparator(), hint);
-    }
-
-    protected static String resolveName(@NonNull final String name, @NonNull final String shardSeparator, @NonNull final String hint) {
-        return String.format("%s%s%s", name, shardSeparator, hint);
     }
 
     /**
@@ -108,7 +104,7 @@ public abstract class ShardedMongoTemplate extends MongoTemplate {
      */
     protected String resolveCollectionNameWithoutEntityContext(final String collectionName)
             throws UnresolvableCollectionShardException {
-        return resolveName(collectionName, resolveCollectionHintWithoutEntityContext());
+        return this.shardingOptions.resolveCollectionName(collectionName, resolveCollectionHintWithoutEntityContext());
     }
 
     /**
@@ -121,6 +117,6 @@ public abstract class ShardedMongoTemplate extends MongoTemplate {
      */
     protected String resolveDatabaseNameWithoutEntityContext(final String databaseName)
             throws UnresolvableDatabaseShardException {
-        return resolveName(databaseName, resolveDatabaseHintWithoutEntityContext());
+        return this.shardingOptions.resolveDatabaseName(databaseName, resolveDatabaseHintWithoutEntityContext());
     }
 }

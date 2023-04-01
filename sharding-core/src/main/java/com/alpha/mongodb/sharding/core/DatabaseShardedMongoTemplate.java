@@ -1,11 +1,14 @@
 package com.alpha.mongodb.sharding.core;
 
+import com.alpha.mongodb.sharding.core.configuration.CompositeShardingOptions;
 import com.alpha.mongodb.sharding.core.configuration.DatabaseShardingOptions;
 import com.alpha.mongodb.sharding.core.entity.DatabaseShardedEntity;
 import com.alpha.mongodb.sharding.core.exception.UnresolvableDatabaseShardException;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
+import lombok.AccessLevel;
+import lombok.Getter;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.FindAndReplaceOptions;
@@ -19,32 +22,54 @@ import org.springframework.data.util.CloseableIterator;
 import java.util.*;
 
 /**
- * Database Sharded Mongo Template. To be used for collections with same names across multiple database shards
+ * Database Sharded Mongo Template. To be used for collections with same
+ * names across multiple database shards
  *
  * @author Shashank Sharma
  */
 public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate {
 
-    Map<String, MongoTemplate> delegatedShardedMongoTemplateMap = new HashMap<>();
+    @Getter(value = AccessLevel.PROTECTED)
+    private final Map<String, MongoTemplate> delegatedShardedMongoTemplateMap = new HashMap<>();
 
     public DatabaseShardedMongoTemplate(MongoClient mongoClient, String databaseName, DatabaseShardingOptions shardingOptions) {
-        super(mongoClient, resolveName(databaseName, shardingOptions.getShardSeparator(), shardingOptions.getDefaultDatabaseHint()), shardingOptions);
-        shardingOptions.getDatabaseHintsSet().forEach(shardHint -> {
-            delegatedShardedMongoTemplateMap.put(shardHint, new MongoTemplate(new SimpleMongoClientDatabaseFactory(mongoClient, databaseName), (MongoConverter) null));
+        super(mongoClient, shardingOptions.resolveDatabaseName(databaseName, shardingOptions.getDefaultDatabaseHint()), shardingOptions);
+        shardingOptions.getDefaultDatabaseHintsSet().forEach(shardHint -> {
+            if (shardingOptions instanceof CompositeShardingOptions) {
+                delegatedShardedMongoTemplateMap.put(shardHint, new CollectionShardedMongoTemplate(
+                        new SimpleMongoClientDatabaseFactory(mongoClient, databaseName),
+                        ((CompositeShardingOptions) shardingOptions).getDelegatedCollectionShardingOptions()));
+            } else {
+                delegatedShardedMongoTemplateMap.put(shardHint, new MongoTemplate(new SimpleMongoClientDatabaseFactory(mongoClient, databaseName), null));
+            }
         });
     }
 
     public DatabaseShardedMongoTemplate(Map<String, MongoDatabaseFactory> delegatedDatabaseFactory, DatabaseShardingOptions shardingOptions) {
         super(delegatedDatabaseFactory.get(shardingOptions.getDefaultDatabaseHint()), shardingOptions);
-        shardingOptions.getDatabaseHintsSet().forEach(shardHint -> {
-            delegatedShardedMongoTemplateMap.put(shardHint, new MongoTemplate(delegatedDatabaseFactory.get(shardHint), null));
+        shardingOptions.getDefaultDatabaseHintsSet().forEach(shardHint -> {
+            if (shardingOptions instanceof CompositeShardingOptions) {
+                delegatedShardedMongoTemplateMap.put(shardHint, new CollectionShardedMongoTemplate(
+                        delegatedDatabaseFactory.get(shardHint),
+                        ((CompositeShardingOptions) shardingOptions).getDelegatedCollectionShardingOptions()));
+            } else {
+                delegatedShardedMongoTemplateMap.put(shardHint, new MongoTemplate(delegatedDatabaseFactory.get(shardHint), null));
+            }
         });
     }
 
     public DatabaseShardedMongoTemplate(Map<String, MongoDatabaseFactory> delegatedDatabaseFactory, MongoConverter mongoConverter, DatabaseShardingOptions shardingOptions) {
         super(delegatedDatabaseFactory.get(shardingOptions.getDefaultDatabaseHint()), mongoConverter, shardingOptions);
-        shardingOptions.getDatabaseHintsSet().forEach(shardHint -> {
-            delegatedShardedMongoTemplateMap.put(shardHint, new MongoTemplate(delegatedDatabaseFactory.get(shardHint), mongoConverter));
+        shardingOptions.getDefaultDatabaseHintsSet().forEach(shardHint -> {
+            if (shardingOptions instanceof CompositeShardingOptions) {
+                delegatedShardedMongoTemplateMap.put(shardHint, new CollectionShardedMongoTemplate(
+                        delegatedDatabaseFactory.get(shardHint),
+                        mongoConverter,
+                        ((CompositeShardingOptions) shardingOptions).getDelegatedCollectionShardingOptions()));
+            } else {
+                delegatedShardedMongoTemplateMap.put(shardHint, new MongoTemplate(delegatedDatabaseFactory.get(shardHint), mongoConverter));
+            }
+
         });
     }
 
@@ -373,17 +398,17 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate {
 
     @Override
     public long countFromAll(Query query, Class<?> entityClass) {
-        return 0;
+        return this.delegatedShardedMongoTemplateMap.values().stream().mapToLong(mongoTemplate -> mongoTemplate.count(query, entityClass)).sum();
     }
 
     @Override
     public long countFromAll(Query query, String collectionName) {
-        return 0;
+        return this.delegatedShardedMongoTemplateMap.values().stream().mapToLong(mongoTemplate -> mongoTemplate.count(query, collectionName)).sum();
     }
 
     @Override
     public long countFromAll(Query query, Class<?> entityClass, String collectionName) {
-        return 0;
+        return this.delegatedShardedMongoTemplateMap.values().stream().mapToLong(mongoTemplate -> mongoTemplate.count(query, entityClass, collectionName)).sum();
     }
 
     @Override
