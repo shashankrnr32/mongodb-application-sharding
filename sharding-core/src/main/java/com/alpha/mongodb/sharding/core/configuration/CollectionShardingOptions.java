@@ -9,6 +9,11 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 
+/**
+ * Collection sharding options
+ *
+ * @author SHashank Sharma
+ */
 @ToString(callSuper = true)
 public class CollectionShardingOptions extends ShardingOptions {
 

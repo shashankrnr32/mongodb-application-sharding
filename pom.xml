@@ -23,7 +23,8 @@
         <project.java.version>1.8</project.java.version>
         <maven.compiler.source>${project.java.version}</maven.compiler.source>
         <maven.compiler.target>${project.java.version}</maven.compiler.target>
-        <revision>1.0-SNAPSHOT</revision>
+        <delombok.output>target/docs</delombok.output>
+        <revision>0.0.1</revision>
     </properties>
 
     <dependencies>
@@ -33,5 +34,13 @@
             <version>1.18.26</version>
         </dependency>
     </dependencies>
+
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/shashankrnr32/mongodb-application-sharding</url>
+        </repository>
+    </distributionManagement>
 
 </project>
