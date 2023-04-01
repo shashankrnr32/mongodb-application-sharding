@@ -25,10 +25,12 @@ public class ShardingHintManager {
         if (ObjectUtils.isEmpty(hintThreadLocal.get())) {
             ShardingHint shardingHint = new ShardingHint();
             shardingHint.setDatabaseHint(databaseHint);
+            hintThreadLocal.set(shardingHint);
         } else {
             ShardingHint shardingHint = hintThreadLocal.get();
             if (StringUtils.isBlank(shardingHint.getDatabaseHint())) {
                 shardingHint.setDatabaseHint(databaseHint);
+                hintThreadLocal.set(shardingHint);
             } else {
                 throw new IllegalStateException("Database hint is already set. Cannot set a new value");
             }
@@ -44,10 +46,12 @@ public class ShardingHintManager {
         if (ObjectUtils.isEmpty(hintThreadLocal.get())) {
             ShardingHint shardingHint = new ShardingHint();
             shardingHint.setCollectionHint(collectionHint);
+            hintThreadLocal.set(shardingHint);
         } else {
             ShardingHint shardingHint = hintThreadLocal.get();
             if (StringUtils.isBlank(shardingHint.getCollectionHint())) {
                 shardingHint.setCollectionHint(collectionHint);
+                hintThreadLocal.set(shardingHint);
             } else {
                 throw new IllegalStateException("Collection hint is already set. Cannot set a new value");
             }
@@ -65,6 +69,7 @@ public class ShardingHintManager {
             ShardingHint shardingHint = new ShardingHint();
             shardingHint.setDatabaseHint(databaseHint);
             shardingHint.setCollectionHint(collectionHint);
+            hintThreadLocal.set(shardingHint);
         } else {
             throw new IllegalStateException("Composite hint is already set. Cannot set a new value");
         }

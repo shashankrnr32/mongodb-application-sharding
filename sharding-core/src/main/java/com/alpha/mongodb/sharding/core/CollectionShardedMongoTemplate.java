@@ -26,6 +26,7 @@ import org.springframework.lang.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Collection Sharded Mongo Template. To be used for collections with different names within a single
@@ -104,20 +105,20 @@ public class CollectionShardedMongoTemplate extends ShardedMongoTemplate {
     }
 
     public long countFromAll(Query query, Class<?> entityClass) {
-        return ((CollectionShardingOptions) this.getShardingOptions()).getCollectionHints().stream().mapToLong(shardHint -> count(query, entityClass)).sum();
+        return ((CollectionShardingOptions) this.getShardingOptions()).getDefaultCollectionHintsSet().stream().mapToLong(shardHint -> count(query, entityClass)).sum();
     }
 
     public long countFromAll(Query query, String collectionName) {
-        return ((CollectionShardingOptions) this.getShardingOptions()).getCollectionHints().stream().mapToLong(shardHint -> count(query, collectionName)).sum();
+        return ((CollectionShardingOptions) this.getShardingOptions()).getDefaultCollectionHintsSet().stream().mapToLong(shardHint -> count(query, collectionName)).sum();
     }
 
     public long countFromAll(Query query, @Nullable Class<?> entityClass, String collectionName) {
-        return ((CollectionShardingOptions) this.getShardingOptions()).getCollectionHints().stream().mapToLong(shardHint -> count(query, entityClass, collectionName)).sum();
+        return ((CollectionShardingOptions) this.getShardingOptions()).getDefaultCollectionHintsSet().stream().mapToLong(shardHint -> count(query, entityClass, collectionName)).sum();
     }
 
     @Override
     public long estimatedCountFromAllShards(String collectionName) {
-        return ((CollectionShardingOptions) this.getShardingOptions()).getCollectionHints().stream().mapToLong(shardHint -> estimatedCount(collectionName)).sum();
+        return ((CollectionShardingOptions) this.getShardingOptions()).getDefaultCollectionHintsSet().stream().mapToLong(shardHint -> estimatedCount(collectionName)).sum();
     }
 
     @Override
@@ -128,11 +129,6 @@ public class CollectionShardedMongoTemplate extends ShardedMongoTemplate {
     @Override
     protected long doEstimatedCount(String collectionName, EstimatedDocumentCountOptions options) {
         return super.doEstimatedCount(resolveCollectionNameWithoutEntityContext(collectionName), options);
-    }
-
-    @Override
-    protected long doExactCount(String collectionName, Document filter, CountOptions options) {
-        return super.doExactCount(resolveCollectionNameWithoutEntityContext(collectionName), filter, options);
     }
 
     @Override
@@ -149,21 +145,45 @@ public class CollectionShardedMongoTemplate extends ShardedMongoTemplate {
         return super.collectionExists(resolveName(collectionName, collectionHint));
     }
 
+    @Override
+    protected String resolveCollectionNameWithoutEntityContext(String collectionName) throws UnresolvableCollectionShardException {
+        String hint = resolveCollectionHintWithoutEntityContext();
+        validateCollectionHint(collectionName, hint);
+        return resolveName(collectionName, hint);
+    }
+
     @NonNull
-    private <T> String resolveCollectionNameWithEntityContext(final String collectionName, final T entity) {
+    private <T> String resolveCollectionNameWithEntityContext(final String collectionName, final T entity) throws UnresolvableCollectionShardException {
         String resolvedCollectionName;
         if (entity instanceof CollectionShardedEntity) {
-            String hint = ((CollectionShardedEntity) entity).getCollectionHint();
+            String hint = ((CollectionShardedEntity) entity).resolveCollectionHint();
+            validateCollectionHint(collectionName, hint);
             resolvedCollectionName = resolveName(collectionName, hint);
         } else {
-            Optional<ShardingHint> hint = ShardingHintManager.get();
-            if (hint.isPresent() && null != hint.get().getCollectionHint()) {
-                resolvedCollectionName = resolveName(collectionName, hint.get().getCollectionHint());
+            Optional<ShardingHint> shardingHint = ShardingHintManager.get();
+            if (shardingHint.isPresent() && null != shardingHint.get().getCollectionHint()) {
+                String hint = shardingHint.get().getCollectionHint();
+                validateCollectionHint(collectionName, hint);
+                resolvedCollectionName = resolveName(collectionName, hint);
             } else {
                 throw new UnresolvableCollectionShardException();
             }
         }
         return resolvedCollectionName;
+    }
+
+    private void validateCollectionHint(final String collectionName, final String hint) {
+        if (null == hint) {
+            throw new UnresolvableCollectionShardException();
+        }
+
+        CollectionShardingOptions collectionShardingOptions = (CollectionShardingOptions) this.getShardingOptions();
+        Set<String> validCollectionHints = collectionShardingOptions.getCollectionHintsSet().getOrDefault(
+                collectionName, collectionShardingOptions.getDefaultCollectionHintsSet());
+
+        if (!validCollectionHints.contains(hint)) {
+            throw new UnresolvableCollectionShardException();
+        }
     }
 
 }

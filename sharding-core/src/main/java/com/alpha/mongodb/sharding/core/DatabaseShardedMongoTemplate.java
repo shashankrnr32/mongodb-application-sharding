@@ -14,9 +14,9 @@ import org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.UpdateDefinition;
+import org.springframework.data.util.CloseableIterator;
 
 import java.util.*;
-import java.util.stream.Stream;
 
 /**
  * Database Sharded Mongo Template. To be used for collections with same names across multiple database shards
@@ -29,22 +29,22 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate {
 
     public DatabaseShardedMongoTemplate(MongoClient mongoClient, String databaseName, DatabaseShardingOptions shardingOptions) {
         super(mongoClient, resolveName(databaseName, shardingOptions.getShardSeparator(), shardingOptions.getDefaultDatabaseHint()), shardingOptions);
-        shardingOptions.getDatabaseHints().forEach(shardHint -> {
+        shardingOptions.getDatabaseHintsSet().forEach(shardHint -> {
             delegatedShardedMongoTemplateMap.put(shardHint, new MongoTemplate(new SimpleMongoClientDatabaseFactory(mongoClient, databaseName), (MongoConverter) null));
         });
     }
 
     public DatabaseShardedMongoTemplate(Map<String, MongoDatabaseFactory> delegatedDatabaseFactory, DatabaseShardingOptions shardingOptions) {
         super(delegatedDatabaseFactory.get(shardingOptions.getDefaultDatabaseHint()), shardingOptions);
-        shardingOptions.getDatabaseHints().forEach(shardHint -> {
-            delegatedShardedMongoTemplateMap.put(shardHint, new MongoTemplate(delegatedDatabaseFactory.get(shardHint), (MongoConverter) null));
+        shardingOptions.getDatabaseHintsSet().forEach(shardHint -> {
+            delegatedShardedMongoTemplateMap.put(shardHint, new MongoTemplate(delegatedDatabaseFactory.get(shardHint), null));
         });
     }
 
     public DatabaseShardedMongoTemplate(Map<String, MongoDatabaseFactory> delegatedDatabaseFactory, MongoConverter mongoConverter, DatabaseShardingOptions shardingOptions) {
         super(delegatedDatabaseFactory.get(shardingOptions.getDefaultDatabaseHint()), mongoConverter, shardingOptions);
-        shardingOptions.getDatabaseHints().forEach(shardHint -> {
-            delegatedShardedMongoTemplateMap.put(shardHint, new MongoTemplate(delegatedDatabaseFactory.get(shardHint), (MongoConverter) null));
+        shardingOptions.getDatabaseHintsSet().forEach(shardHint -> {
+            delegatedShardedMongoTemplateMap.put(shardHint, new MongoTemplate(delegatedDatabaseFactory.get(shardHint), mongoConverter));
         });
     }
 
@@ -332,12 +332,12 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate {
     }
 
     @Override
-    public <T> Stream<T> stream(Query query, Class<T> entityType) {
+    public <T> CloseableIterator<T> stream(Query query, Class<T> entityType) {
         return getDelegatedTemplateWithoutEntityContext().stream(query, entityType);
     }
 
     @Override
-    public <T> Stream<T> stream(Query query, Class<T> entityType, String collectionName) {
+    public <T> CloseableIterator<T> stream(Query query, Class<T> entityType, String collectionName) {
         return getDelegatedTemplateWithoutEntityContext().stream(query, entityType, collectionName);
     }
 
@@ -401,9 +401,8 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate {
     }
 
     private <T> MongoTemplate getDelegatedTemplateWithEntityContext(T entity) {
-        MongoTemplate resolvedMongoTemplate;
         if (entity instanceof DatabaseShardedEntity) {
-            return delegatedShardedMongoTemplateMap.get(((DatabaseShardedEntity) entity).getDatabaseHint());
+            return delegatedShardedMongoTemplateMap.get(((DatabaseShardedEntity) entity).resolveDatabaseHint());
         } else {
             return getDelegatedTemplateWithoutEntityContext();
         }
@@ -411,7 +410,7 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate {
 
     private <T> String resolveDatabaseHintWithEntityContext(T entity) {
         if (entity instanceof DatabaseShardedEntity) {
-            return ((DatabaseShardedEntity) entity).getDatabaseHint();
+            return ((DatabaseShardedEntity) entity).resolveDatabaseHint();
         } else {
             return resolveDatabaseHintWithoutEntityContext();
         }

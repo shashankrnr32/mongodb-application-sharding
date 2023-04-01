@@ -1,33 +1,42 @@
 package com.alpha.mongodb.sharding.core.configuration;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
-import org.apache.commons.collections.CollectionUtils;
 
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-@Data
 @ToString(callSuper = true)
 public class DatabaseShardingOptions extends ShardingOptions {
-    private List<String> databaseHints;
 
+    private final List<String> defaultDatabaseHints;
+
+    @Setter
     private String defaultDatabaseHint;
+
+    // Derived from other set fields
+
+    @Getter
+    private final Set<String> databaseHintsSet;
+
+    public DatabaseShardingOptions(List<String> defaultDatabaseHints) {
+        this.defaultDatabaseHints = defaultDatabaseHints;
+        databaseHintsSet = new HashSet<>(defaultDatabaseHints);
+    }
 
     public String getDefaultDatabaseHint() {
         if (defaultDatabaseHint == null) {
-            return databaseHints.get(0);
+            return defaultDatabaseHints.get(0);
         } else {
             return defaultDatabaseHint;
         }
     }
 
-    public void setIntStreamHints(IntStream stream) {
-        if (CollectionUtils.isEmpty(databaseHints)) {
-            databaseHints = new ArrayList<>();
-        }
-        this.databaseHints.addAll(stream.mapToObj(String::valueOf).collect(Collectors.toList()));
+    public static DatabaseShardingOptions withIntegerStreamHints(IntStream stream) {
+        return new DatabaseShardingOptions(stream.mapToObj(String::valueOf).collect(Collectors.toList()));
     }
 }
