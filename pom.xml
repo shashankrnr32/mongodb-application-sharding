@@ -66,10 +66,26 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.10.0</version>
+                <version>3.4.1</version>
                 <configuration>
+                    <!-- Default configuration for all reports -->
+                    <noqualifier>all</noqualifier>
+                    <destDir>${project.build.directory}/docs</destDir>
                     <sourcepath>${delombok.output}</sourcepath>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>aggregate</id>
+                        <goals>
+                            <goal>aggregate</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Specific configuration for the aggregate report -->
+                            <reportOutputDirectory>${project.build.directory}/docs</reportOutputDirectory>
+                            <destDir>javadoc</destDir>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
