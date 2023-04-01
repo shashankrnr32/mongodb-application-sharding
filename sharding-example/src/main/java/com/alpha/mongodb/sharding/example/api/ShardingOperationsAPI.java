@@ -29,8 +29,8 @@ public class ShardingOperationsAPI {
                                       @RequestParam ShardingType shardingType,
                                       @RequestParam DataSourceType dataSourceType) {
         if (StringUtils.isNotBlank(collectionShardHint)) {
-            System.out.println(collectionShardHint);
             ShardingHintManager.setCollectionHint(collectionShardHint);
+            ShardingHintManager.setDatabaseHint(databaseShardHint);
         }
         Optional<?> entityOptional = serviceFactory.get(shardingType, dataSourceType).findById(id);
         if (entityOptional.isPresent()) {
