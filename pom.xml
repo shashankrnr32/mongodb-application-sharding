@@ -34,4 +34,12 @@
         </dependency>
     </dependencies>
 
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/shashankrnr32/mongodb-application-sharding</url>
+        </repository>
+    </distributionManagement>
+
 </project>
