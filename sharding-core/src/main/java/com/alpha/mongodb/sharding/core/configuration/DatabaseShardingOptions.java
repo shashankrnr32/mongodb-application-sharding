@@ -19,18 +19,20 @@ import java.util.stream.IntStream;
 public class DatabaseShardingOptions extends ShardingOptions {
 
     private final List<String> defaultDatabaseHints;
+    @Getter
+    private final Set<String> defaultDatabaseHintsSet;
 
+    // Derived from other set fields
     @Setter
     private String defaultDatabaseHint;
 
-    // Derived from other set fields
-
-    @Getter
-    private final Set<String> databaseHintsSet;
-
     public DatabaseShardingOptions(List<String> defaultDatabaseHints) {
         this.defaultDatabaseHints = defaultDatabaseHints;
-        databaseHintsSet = new HashSet<>(defaultDatabaseHints);
+        defaultDatabaseHintsSet = new HashSet<>(defaultDatabaseHints);
+    }
+
+    public static DatabaseShardingOptions withIntegerStreamHints(IntStream stream) {
+        return new DatabaseShardingOptions(stream.mapToObj(String::valueOf).collect(Collectors.toList()));
     }
 
     public String getDefaultDatabaseHint() {
@@ -39,9 +41,5 @@ public class DatabaseShardingOptions extends ShardingOptions {
         } else {
             return defaultDatabaseHint;
         }
-    }
-
-    public static DatabaseShardingOptions withIntegerStreamHints(IntStream stream) {
-        return new DatabaseShardingOptions(stream.mapToObj(String::valueOf).collect(Collectors.toList()));
     }
 }

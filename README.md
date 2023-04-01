@@ -4,7 +4,8 @@
 [![Maven Package](https://github.com/shashankrnr32/mongodb-application-sharding/actions/workflows/maven-publish.yml/badge.svg)](https://github.com/shashankrnr32/mongodb-application-sharding/actions/workflows/maven-publish.yml)
 
 Mongo DB Application Sharding allows you to shard your Mongo DB cluster from your application using different
-strategies.
+strategies. This project is inspired by [Apache's shardingsphere](https://github.com/apache/shardingsphere) which
+enables the users to shard the relational databases through the application.
 
 Application Sharding Strategies supported by the library
 
@@ -20,13 +21,13 @@ as a dependency to your project.
 ```xml
 <!-- sharding-core -->
 <dependency>
-    <groupId>com.alpha</groupId>
+    <groupId>com.alpha.mongodb</groupId>
     <artifactId>sharding-core</artifactId>
     <version>${mongodb.sharding.version}</version>
 </dependency>
 ```
 
-## Collection Sharding Strategy
+### Collection Sharding Strategy
 
 Sharding strategy where data is divided into multiple collections in a single database identified by a shardHint
 (usually a suffix to the collection name)
@@ -38,7 +39,7 @@ TEST_1
 TEST_2
 ```
 
-### How to use?
+#### How to use?
 
 1. Create a custom `MongoTemplate` bean using the snippet given in
    [this example](sharding-example/src/main/java/com/alpha/mongodb/sharding/example/configuration/CollectionShardedMongoConfiguration.java)
@@ -91,7 +92,7 @@ public class TestShardedEntity implements CollectionShardedEntity {
 
 4. Voila!.
 
-### Sharding Hint
+#### Sharding Hint
 
 In order to route the write queries, the entities are supposed to implement from CollectionShardedEntity. But, the find
 queries can take place with different criterion, with different fields. In order to route the find query to the right
@@ -115,6 +116,14 @@ public class TestRepository {
 If the sharding hint is not set, methods will throw
 a [`UnresolvableShardException`](sharding-core/src/main/java/com/alpha/mongodb/sharding/core/exception/UnresolvableShardException.java)
 .
+
+### Database Sharding Strategy
+
+Coming soon...!
+
+### Composite Sharding Strategy
+
+Coming soon...!
 
 ## Author
 

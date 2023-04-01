@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
-public class CollectionShardedOperationService implements ShardedOperationsService {
+public class TemplateCollectionShardedOperationService implements ShardedOperationsService {
 
     @Autowired
     @Qualifier("collectionShardedMongoTemplate")

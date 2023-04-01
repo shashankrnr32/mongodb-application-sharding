@@ -18,19 +18,14 @@ import java.util.stream.IntStream;
 public class CollectionShardingOptions extends ShardingOptions {
 
     private final List<String> defaultCollectionHints;
-
+    @Getter
+    private final Set<String> defaultCollectionHintsSet;
     @Setter
     private String defaultCollectionHint;
 
+    // Derived from other set fields
     @Getter
     private Map<String, List<String>> collectionHints = new HashMap<>();
-
-    // Derived from other set fields
-
-    @Getter
-    private final Set<String> defaultCollectionHintsSet;
-
-    @Setter
     @Getter
     private Map<String, Set<String>> collectionHintsSet = new HashMap<>();
 
@@ -39,16 +34,16 @@ public class CollectionShardingOptions extends ShardingOptions {
         defaultCollectionHintsSet = new HashSet<>(defaultCollectionHints);
     }
 
+    public static CollectionShardingOptions withIntegerStreamHints(IntStream stream) {
+        return new CollectionShardingOptions(stream.mapToObj(String::valueOf).collect(Collectors.toList()));
+    }
+
     public String getDefaultCollectionHint() {
         if (defaultCollectionHint == null) {
             return defaultCollectionHints.get(0);
         } else {
             return defaultCollectionHint;
         }
-    }
-
-    public static CollectionShardingOptions withIntegerStreamHints(IntStream stream) {
-        return new CollectionShardingOptions(stream.mapToObj(String::valueOf).collect(Collectors.toList()));
     }
 
     public void setCollectionHints(Map<String, List<String>> collectionHints) {
