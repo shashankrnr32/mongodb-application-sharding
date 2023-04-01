@@ -10,6 +10,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+/**
+ * Database Sharding options
+ *
+ * @author Shashank Sharma
+ */
 @ToString(callSuper = true)
 public class DatabaseShardingOptions extends ShardingOptions {
 
