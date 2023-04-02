@@ -90,8 +90,6 @@ public class TestShardedEntity implements CollectionShardedEntity {
 
 3. Autowire the `collectionShardedMongoTemplate` and use it wherever required.
 
-4. Voila!.
-
 #### Sharding Hint
 
 In order to route the write queries, the entities are supposed to implement from CollectionShardedEntity. But, the find
@@ -102,6 +100,10 @@ collection, sharding hint is used.
 import java.util.Optional;
 
 public class TestRepository {
+
+    @Autowired
+    @Qualifier("collectionShardedMongoTemplate")
+    private MongoTemplate collectionShardedMongoTemplate;
 
     public Optional<TestShardEntity> findById() {
         ShardingHintManager.setCollectionHint("3");
@@ -214,9 +216,36 @@ public class TestShardedEntity implements CollectionShardedEntity {
 }
 ```
 
-3. Autowire the `collectionShardedMongoTemplate` and use it wherever required.
+3. Autowire the `databaseShardedMongoTemplate` and use it wherever required.
 
-4. Voila!.
+#### Sharding Hint
+
+In order to route the write queries, the entities are supposed to implement from DatabaseShardedEntity. But, the find
+queries can take place with different criterion, with different fields. In order to route the find query to the right
+database, sharding hint is used.
+
+```java
+import java.util.Optional;
+
+public class TestRepository {
+
+    @Autowired
+    @Qualifier("databaseShardedMongoTemplate")
+    private MongoTemplate databaseShardedMongoTemplate;
+
+    public Optional<TestShardEntity> findById() {
+        ShardingHintManager.setDatabaseHint("3");
+        return Optional.ofNullable(
+                databaseShardedMongoTemplate.findById(
+                        "6427b9327a2cad734d5ff051",
+                        TestShardEntity.class));
+    }
+}
+```
+
+If the sharding hint is not set, methods will throw
+a [`UnresolvableShardException`](sharding-core/src/main/java/com/alpha/mongodb/sharding/core/exception/UnresolvableShardException.java)
+.
 
 ### Composite Sharding Strategy
 
