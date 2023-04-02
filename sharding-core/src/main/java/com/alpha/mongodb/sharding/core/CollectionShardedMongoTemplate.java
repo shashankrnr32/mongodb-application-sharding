@@ -26,7 +26,6 @@ import org.springframework.lang.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * Collection Sharded Mongo Template. To be used for collections with different names within a single
@@ -153,7 +152,8 @@ public class CollectionShardedMongoTemplate extends ShardedMongoTemplate {
     }
 
     @NonNull
-    private <T> String resolveCollectionNameWithEntityContext(final String collectionName, final T entity) throws UnresolvableCollectionShardException {
+    private <T> String resolveCollectionNameWithEntityContext(final String collectionName, final T entity)
+            throws UnresolvableCollectionShardException {
         String resolvedCollectionName;
         if (entity instanceof CollectionShardedEntity) {
             String hint = ((CollectionShardedEntity) entity).resolveCollectionHint();
@@ -172,16 +172,9 @@ public class CollectionShardedMongoTemplate extends ShardedMongoTemplate {
         return resolvedCollectionName;
     }
 
-    private void validateCollectionHint(final String collectionName, final String hint) {
-        if (null == hint) {
-            throw new UnresolvableCollectionShardException();
-        }
-
-        CollectionShardingOptions collectionShardingOptions = (CollectionShardingOptions) this.getShardingOptions();
-        Set<String> validCollectionHints = collectionShardingOptions.getCollectionHintsSet().getOrDefault(
-                collectionName, collectionShardingOptions.getDefaultCollectionHintsSet());
-
-        if (!validCollectionHints.contains(hint)) {
+    private void validateCollectionHint(final String collectionName, final String hint)
+            throws UnresolvableCollectionShardException {
+        if (this.getShardingOptions().validateCollectionHint(collectionName, hint)) {
             throw new UnresolvableCollectionShardException();
         }
     }

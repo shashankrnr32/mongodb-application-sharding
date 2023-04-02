@@ -32,7 +32,7 @@ as a dependency to your project.
 Sharding strategy where data is divided into multiple collections in a single database identified by a shardHint
 (usually a suffix to the collection name)
 
-```text
+```shell
 ds0> show collections
 TEST_0
 TEST_1
@@ -90,8 +90,6 @@ public class TestShardedEntity implements CollectionShardedEntity {
 
 3. Autowire the `collectionShardedMongoTemplate` and use it wherever required.
 
-4. Voila!.
-
 #### Sharding Hint
 
 In order to route the write queries, the entities are supposed to implement from CollectionShardedEntity. But, the find
@@ -102,6 +100,10 @@ collection, sharding hint is used.
 import java.util.Optional;
 
 public class TestRepository {
+
+    @Autowired
+    @Qualifier("collectionShardedMongoTemplate")
+    private MongoTemplate collectionShardedMongoTemplate;
 
     public Optional<TestShardEntity> findById() {
         ShardingHintManager.setCollectionHint("3");
@@ -119,7 +121,131 @@ a [`UnresolvableShardException`](sharding-core/src/main/java/com/alpha/mongodb/s
 
 ### Database Sharding Strategy
 
-Coming soon...!
+Sharding strategy where data is divided into multiple databases with the collection name being same across multiple
+databases.
+
+```shell
+> show databases
+DatabaseShardedDS0          72.00 KiB
+DatabaseShardedDS1          40.00 KiB
+DatabaseShardedDS2          72.00 KiB
+
+> use DatabaseShardedDS0
+'switched to db DatabaseShardedDS0'
+DatabaseShardedDS0> show collections
+TEST
+
+> use DatabaseShardedDS1
+'switched to db DatabaseShardedDS1'
+DatabaseShardedDS1> show collections
+TEST
+
+> use DatabaseShardedDS2
+'switched to db DatabaseShardedDS2'
+DatabaseShardedDS2> show collections
+TEST
+```
+
+#### How to use?
+
+1. Create a custom `MongoTemplate` bean using the snippet given in
+   [this example](sharding-example/src/main/java/com/alpha/mongodb/sharding/example/configuration/DatabaseShardedMongoConfiguration.java)
+   .
+
+```java
+
+@Configuration
+public class DatabaseShardedMongoConfiguration {
+
+    private static final String SPRING_MONGO_DB_URI_DATABASE_SHARDED_DS0 = "spring.mongodb.sharded.database.ds0.uri";
+    private static final String SPRING_MONGO_DB_URI_DATABASE_SHARDED_DS1 = "spring.mongodb.sharded.database.ds1.uri";
+    private static final String SPRING_MONGO_DB_URI_DATABASE_SHARDED_DS2 = "spring.mongodb.sharded.database.ds2.uri";
+
+    @Autowired
+    private Environment environment;
+
+    @Bean
+    public MongoDatabaseFactory ds0ShardedMongoDbFactory() {
+        return new SimpleMongoClientDatabaseFactory(environment.getProperty(SPRING_MONGO_DB_URI_DATABASE_SHARDED_DS0));
+    }
+
+    @Bean
+    public MongoDatabaseFactory ds1ShardedMongoDbFactory() {
+        return new SimpleMongoClientDatabaseFactory(environment.getProperty(SPRING_MONGO_DB_URI_DATABASE_SHARDED_DS1));
+    }
+
+    @Bean
+    public MongoDatabaseFactory ds2ShardedMongoDbFactory() {
+        return new SimpleMongoClientDatabaseFactory(environment.getProperty(SPRING_MONGO_DB_URI_DATABASE_SHARDED_DS2));
+    }
+
+    @Bean("databaseShardedMongoTemplate")
+    public MongoTemplate databaseShardedMongoTemplate() {
+        DatabaseShardingOptions shardingOptions = DatabaseShardingOptions.withIntegerStreamHints(IntStream.range(0, 3));
+        Map<String, MongoDatabaseFactory> factoryMap = new HashMap<String, MongoDatabaseFactory>() {{
+            put(String.valueOf(0), ds0ShardedMongoDbFactory());
+            put(String.valueOf(1), ds1ShardedMongoDbFactory());
+            put(String.valueOf(2), ds2ShardedMongoDbFactory());
+        }};
+        return new DatabaseShardedMongoTemplate(factoryMap, shardingOptions);
+    }
+}
+```
+
+2. Implement your entity classes from
+   [`DatabaseShardedEntity`](sharding-core/src/main/java/com/alpha/mongodb/sharding/core/entity/DatabaseShardedEntity.java)
+   like the example given below. This will ensure the writes to the entity gets routed to the right database.
+
+```java
+// Sample TestShardedEntity
+@Document("TEST")
+@Data
+@FieldNameConstants
+public class TestShardedEntity implements CollectionShardedEntity {
+
+    @Id
+    private String id;
+
+    @Indexed(unique = true)
+    private String indexedField;
+
+    @Override
+    public String resolveDatabaseHint() {
+        return String.valueOf(indexedField.charAt(0) - '0');
+    }
+}
+```
+
+3. Autowire the `databaseShardedMongoTemplate` and use it wherever required.
+
+#### Sharding Hint
+
+In order to route the write queries, the entities are supposed to implement from DatabaseShardedEntity. But, the find
+queries can take place with different criterion, with different fields. In order to route the find query to the right
+database, sharding hint is used.
+
+```java
+import java.util.Optional;
+
+public class TestRepository {
+
+    @Autowired
+    @Qualifier("databaseShardedMongoTemplate")
+    private MongoTemplate databaseShardedMongoTemplate;
+
+    public Optional<TestShardEntity> findById() {
+        ShardingHintManager.setDatabaseHint("3");
+        return Optional.ofNullable(
+                databaseShardedMongoTemplate.findById(
+                        "6427b9327a2cad734d5ff051",
+                        TestShardEntity.class));
+    }
+}
+```
+
+If the sharding hint is not set, methods will throw
+a [`UnresolvableShardException`](sharding-core/src/main/java/com/alpha/mongodb/sharding/core/exception/UnresolvableShardException.java)
+.
 
 ### Composite Sharding Strategy
 

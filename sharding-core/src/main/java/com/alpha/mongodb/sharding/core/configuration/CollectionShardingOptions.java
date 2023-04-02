@@ -53,4 +53,16 @@ public class CollectionShardingOptions extends ShardingOptions {
             collectionHintsSet.put(collectionName, new HashSet<>(hints));
         });
     }
+
+    @Override
+    public boolean validateCollectionHint(String collectionName, String hint) {
+        if (null == hint) {
+            return false;
+        }
+
+        Set<String> validCollectionHints = this.getCollectionHintsSet().getOrDefault(
+                collectionName, getDefaultCollectionHintsSet());
+
+        return validCollectionHints.contains(hint);
+    }
 }

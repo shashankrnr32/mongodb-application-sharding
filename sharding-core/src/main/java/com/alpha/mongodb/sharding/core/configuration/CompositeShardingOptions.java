@@ -78,5 +78,15 @@ public class CompositeShardingOptions extends DatabaseShardingOptions {
         public String resolveCollectionName(String collectionName, String hint) {
             return delegate.resolveCollectionName(collectionName, hint);
         }
+
+        @Override
+        public boolean validateCollectionHint(String collectionName, String hint) {
+            return delegate.validateCollectionHint(collectionName, hint);
+        }
+
+        @Override
+        public boolean validateDatabaseHint(String databaseName, String hint) {
+            return delegate.validateDatabaseHint(databaseName, hint);
+        }
     }
 }
