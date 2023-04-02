@@ -49,6 +49,4 @@ public class DatabaseShardedMongoConfiguration {
         }};
         return new DatabaseShardedMongoTemplate(factoryMap, shardingOptions);
     }
-
-
 }
