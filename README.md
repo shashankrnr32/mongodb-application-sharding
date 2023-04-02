@@ -194,7 +194,7 @@ public class DatabaseShardedMongoConfiguration {
 
 2. Implement your entity classes from
    [`DatabaseShardedEntity`](sharding-core/src/main/java/com/alpha/mongodb/sharding/core/entity/DatabaseShardedEntity.java)
-   like the example given below. This will ensure the writes to the entity gets routed to the right collection.
+   like the example given below. This will ensure the writes to the entity gets routed to the right database.
 
 ```java
 // Sample TestShardedEntity
