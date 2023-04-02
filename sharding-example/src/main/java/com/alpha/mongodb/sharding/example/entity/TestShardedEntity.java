@@ -7,15 +7,12 @@ import lombok.Data;
 import lombok.experimental.FieldNameConstants;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.FieldType;
-import org.springframework.data.mongodb.core.mapping.MongoId;
 
 @Document("TEST")
 @Data
 @FieldNameConstants
 public class TestShardedEntity implements CollectionShardedEntity, DatabaseShardedEntity, CompositeShardedEntity {
 
-    @MongoId(FieldType.OBJECT_ID)
     private String id;
 
     @Indexed(unique = true)
