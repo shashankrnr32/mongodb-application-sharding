@@ -18,5 +18,5 @@ jobs:
           java-version: 11
           target-folder: javadoc
           project: maven
-          folder: sharding-core/target/site/apidocs
+          subdirectories: sharding-core
           custom-command: "mvn -pl sharding-core javadoc:aggregate"
