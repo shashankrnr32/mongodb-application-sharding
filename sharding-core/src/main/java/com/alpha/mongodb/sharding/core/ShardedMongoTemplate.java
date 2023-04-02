@@ -88,7 +88,7 @@ public abstract class ShardedMongoTemplate extends MongoTemplate {
     protected String resolveDatabaseHintWithoutEntityContext() throws UnresolvableDatabaseShardException {
         Optional<ShardingHint> hint = ShardingHintManager.get();
         if (hint.isPresent() && null != hint.get().getDatabaseHint()) {
-            return hint.get().getCollectionHint();
+            return hint.get().getDatabaseHint();
         } else {
             throw new UnresolvableCollectionShardException();
         }

@@ -5,7 +5,6 @@ import com.alpha.mongodb.sharding.core.entity.CompositeShardedEntity;
 import com.alpha.mongodb.sharding.core.entity.DatabaseShardedEntity;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -14,7 +13,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @FieldNameConstants
 public class TestShardedEntity implements CollectionShardedEntity, DatabaseShardedEntity, CompositeShardedEntity {
 
-    @Id
     private String id;
 
     @Indexed(unique = true)

@@ -5,6 +5,7 @@ import com.alpha.mongodb.sharding.core.configuration.CollectionShardingOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.Environment;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -25,11 +26,13 @@ public class CollectionShardedMongoConfiguration {
     private Environment environment;
 
     @Bean
+    @Primary
     public MongoDatabaseFactory collectionShardedMongoDbFactory() {
         return new SimpleMongoClientDatabaseFactory(environment.getProperty(SPRING_MONGO_DB_URI_COLLECTION_SHARDED));
     }
 
     @Bean("collectionShardedMongoTemplate")
+    @Primary
     public MongoTemplate collectionShardedMongoTemplate() {
         CollectionShardingOptions shardingOptions =
                 CollectionShardingOptions.withIntegerStreamHints(IntStream.range(0, 3));

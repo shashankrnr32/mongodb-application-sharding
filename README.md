@@ -10,8 +10,8 @@ enables the users to shard the relational databases through the application.
 Application Sharding Strategies supported by the library
 
 1. [Collection](#collection-sharding-strategy)
-2. Database
-3. Composite
+2. [Database](#database-sharding-strategy)
+3. [Composite](#composite-sharding-strategy)
 
 ## Get Started
 
