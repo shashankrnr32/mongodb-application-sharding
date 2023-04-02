@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - db_sharding
 
 jobs:
   publish:
