@@ -4,7 +4,11 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -25,9 +29,9 @@ public class CollectionShardingOptions extends ShardingOptions {
 
     // Derived from other set fields
     @Getter
-    private Map<String, List<String>> collectionHints = new HashMap<>();
+    private Map<String, List<String>> collectionHintsMapList = new HashMap<>();
     @Getter
-    private Map<String, Set<String>> collectionHintsSet = new HashMap<>();
+    private Map<String, Set<String>> collectionHintsMapSet = new HashMap<>();
 
     public CollectionShardingOptions(List<String> defaultCollectionHints) {
         this.defaultCollectionHints = defaultCollectionHints;
@@ -46,11 +50,11 @@ public class CollectionShardingOptions extends ShardingOptions {
         }
     }
 
-    public void setCollectionHints(Map<String, List<String>> collectionHints) {
-        this.collectionHints = collectionHints;
-        collectionHintsSet = new HashMap<>();
-        collectionHints.forEach((collectionName, hints) -> {
-            collectionHintsSet.put(collectionName, new HashSet<>(hints));
+    public void setCollectionHintsMapList(Map<String, List<String>> collectionHintsMapList) {
+        this.collectionHintsMapList = collectionHintsMapList;
+        collectionHintsMapSet = new HashMap<>();
+        collectionHintsMapList.forEach((collectionName, hints) -> {
+            collectionHintsMapSet.put(collectionName, new HashSet<>(hints));
         });
     }
 
@@ -60,7 +64,7 @@ public class CollectionShardingOptions extends ShardingOptions {
             return false;
         }
 
-        Set<String> validCollectionHints = this.getCollectionHintsSet().getOrDefault(
+        Set<String> validCollectionHints = this.getCollectionHintsMapSet().getOrDefault(
                 collectionName, getDefaultCollectionHintsSet());
 
         return validCollectionHints.contains(hint);

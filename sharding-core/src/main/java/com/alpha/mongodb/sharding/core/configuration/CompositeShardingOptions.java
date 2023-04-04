@@ -4,7 +4,11 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Composite sharding options
@@ -64,7 +68,7 @@ public class CompositeShardingOptions extends DatabaseShardingOptions {
         public DelegatedCollectionShardingOptions(CompositeShardingOptions compositeShardingOptions) {
             super(compositeShardingOptions.defaultCollectionHints);
             this.delegate = compositeShardingOptions;
-            this.setCollectionHints(compositeShardingOptions.getCollectionHints());
+            this.setCollectionHintsMapList(compositeShardingOptions.getCollectionHints());
             this.setDefaultCollectionHint(compositeShardingOptions.getDefaultCollectionHint());
             this.setShardSeparator(compositeShardingOptions.getShardSeparator());
         }
