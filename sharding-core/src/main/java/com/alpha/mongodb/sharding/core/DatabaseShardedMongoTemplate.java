@@ -4,11 +4,13 @@ import com.alpha.mongodb.sharding.core.configuration.CompositeShardingOptions;
 import com.alpha.mongodb.sharding.core.configuration.DatabaseShardingOptions;
 import com.alpha.mongodb.sharding.core.entity.DatabaseShardedEntity;
 import com.alpha.mongodb.sharding.core.exception.UnresolvableDatabaseShardException;
+import com.alpha.mongodb.sharding.core.hint.ShardingHint;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import lombok.AccessLevel;
 import lombok.Getter;
+import org.bson.Document;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.FindAndReplaceOptions;
@@ -19,7 +21,13 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.UpdateDefinition;
 import org.springframework.data.util.CloseableIterator;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Database Sharded Mongo Template. To be used for collections with same
@@ -32,17 +40,24 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate {
     @Getter(value = AccessLevel.PROTECTED)
     private final Map<String, MongoTemplate> delegatedShardedMongoTemplateMap = new HashMap<>();
 
-    public DatabaseShardedMongoTemplate(MongoClient mongoClient, String databaseName, DatabaseShardingOptions shardingOptions) {
-        super(mongoClient, shardingOptions.resolveDatabaseName(databaseName, shardingOptions.getDefaultDatabaseHint()), shardingOptions);
+    public DatabaseShardedMongoTemplate(Map<String, MongoClient> delegatedMongoClient, String databaseName, DatabaseShardingOptions shardingOptions) {
+        super(delegatedMongoClient.get(shardingOptions.getDefaultDatabaseHint()),
+                shardingOptions.resolveDatabaseName(databaseName, shardingOptions.getDefaultDatabaseHint()), shardingOptions);
         shardingOptions.getDefaultDatabaseHintsSet().forEach(shardHint -> {
             if (shardingOptions instanceof CompositeShardingOptions) {
                 delegatedShardedMongoTemplateMap.put(shardHint, new CollectionShardedMongoTemplate(
-                        new SimpleMongoClientDatabaseFactory(mongoClient, databaseName),
+                        new SimpleMongoClientDatabaseFactory(delegatedMongoClient.get(shardHint),
+                                shardingOptions.resolveDatabaseName(databaseName, shardHint)),
                         ((CompositeShardingOptions) shardingOptions).getDelegatedCollectionShardingOptions()));
             } else {
-                delegatedShardedMongoTemplateMap.put(shardHint, new MongoTemplate(new SimpleMongoClientDatabaseFactory(mongoClient, databaseName), null));
+                delegatedShardedMongoTemplateMap.put(shardHint, new MongoTemplate(
+                        new SimpleMongoClientDatabaseFactory(delegatedMongoClient.get(shardHint), databaseName), null));
             }
         });
+    }
+
+    public DatabaseShardedMongoTemplate(MongoClient delegatedMongoClient, String databaseName, DatabaseShardingOptions shardingOptions) {
+        this(shardingOptions.getDefaultDatabaseHintsSet().stream().collect(Collectors.toMap(s -> s, s -> delegatedMongoClient)), databaseName, shardingOptions);
     }
 
     public DatabaseShardedMongoTemplate(Map<String, MongoDatabaseFactory> delegatedDatabaseFactory, DatabaseShardingOptions shardingOptions) {
@@ -75,27 +90,27 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate {
 
     @Override
     public <T> List<T> find(Query query, Class<T> entityClass) {
-        return getDelegatedTemplateWithoutEntityContext().find(query, entityClass);
+        return getDelegatedTemplateForFindContext(entityClass, query).find(query, entityClass);
     }
 
     @Override
     public <T> List<T> find(Query query, Class<T> entityClass, String collectionName) {
-        return getDelegatedTemplateWithoutEntityContext().find(query, entityClass, collectionName);
+        return getDelegatedTemplateForFindContext(entityClass, query).find(query, entityClass, collectionName);
     }
 
     @Override
     public <T> List<T> findAll(Class<T> entityClass) {
-        return getDelegatedTemplateWithoutEntityContext().findAll(entityClass);
+        return getDelegatedTemplateForFindContext(entityClass, new Document()).findAll(entityClass);
     }
 
     @Override
     public <T> List<T> findAll(Class<T> entityClass, String collectionName) {
-        return getDelegatedTemplateWithoutEntityContext().findAll(entityClass, collectionName);
+        return getDelegatedTemplateForFindContext(entityClass, new Document()).findAll(entityClass, collectionName);
     }
 
     @Override
     public <T> List<T> findAllAndRemove(Query query, Class<T> entityClass) {
-        return getDelegatedTemplateWithoutEntityContext().findAllAndRemove(query, entityClass);
+        return getDelegatedTemplateForDeleteContext(entityClass, query).findAllAndRemove(query, entityClass);
     }
 
     @Override
@@ -105,42 +120,42 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate {
 
     @Override
     public <T> List<T> findAllAndRemove(Query query, Class<T> entityClass, String collectionName) {
-        return getDelegatedTemplateWithoutEntityContext().findAllAndRemove(query, entityClass, collectionName);
+        return getDelegatedTemplateForDeleteContext(entityClass, query).findAllAndRemove(query, entityClass, collectionName);
     }
 
     @Override
     public <T> T findAndModify(Query query, UpdateDefinition update, Class<T> entityClass) {
-        return getDelegatedTemplateWithoutEntityContext().findAndModify(query, update, entityClass);
+        return getDelegatedTemplateForUpdateContext(entityClass, query, update).findAndModify(query, update, entityClass);
     }
 
     @Override
     public <T> T findAndModify(Query query, UpdateDefinition update, Class<T> entityClass, String collectionName) {
-        return getDelegatedTemplateWithoutEntityContext().findAndModify(query, update, entityClass, collectionName);
+        return getDelegatedTemplateForUpdateContext(entityClass, query, update).findAndModify(query, update, entityClass, collectionName);
     }
 
     @Override
     public <T> T findAndModify(Query query, UpdateDefinition update, FindAndModifyOptions options, Class<T> entityClass) {
-        return getDelegatedTemplateWithoutEntityContext().findAndModify(query, update, options, entityClass);
+        return getDelegatedTemplateForUpdateContext(entityClass, query, update).findAndModify(query, update, options, entityClass);
     }
 
     @Override
     public <T> T findAndModify(Query query, UpdateDefinition update, FindAndModifyOptions options, Class<T> entityClass, String collectionName) {
-        return getDelegatedTemplateWithoutEntityContext().findAndModify(query, update, options, entityClass, collectionName);
+        return getDelegatedTemplateForUpdateContext(entityClass, query, update).findAndModify(query, update, options, entityClass, collectionName);
     }
 
     @Override
     public <T> T findAndRemove(Query query, Class<T> entityClass) {
-        return getDelegatedTemplateWithoutEntityContext().findAndRemove(query, entityClass);
+        return getDelegatedTemplateForDeleteContext(entityClass, query).findAndRemove(query, entityClass);
     }
 
     @Override
     public <T> T findAndRemove(Query query, Class<T> entityClass, String collectionName) {
-        return getDelegatedTemplateWithoutEntityContext().findAndRemove(query, entityClass, collectionName);
+        return getDelegatedTemplateForDeleteContext(entityClass, query).findAndRemove(query, entityClass, collectionName);
     }
 
     @Override
     public <T> T findAndReplace(Query query, T replacement) {
-        return getDelegatedTemplateWithEntityContext(replacement).findAndReplace(query, replacement);
+        return getDelegatedTemplateForSaveContext(replacement).findAndReplace(query, replacement);
     }
 
     @Override
@@ -175,12 +190,12 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate {
 
     @Override
     public <T> T findOne(Query query, Class<T> entityClass) {
-        return getDelegatedTemplateWithoutEntityContext().findOne(query, entityClass);
+        return getDelegatedTemplateForFindContext(entityClass, query).findOne(query, entityClass);
     }
 
     @Override
     public <T> T findOne(Query query, Class<T> entityClass, String collectionName) {
-        return getDelegatedTemplateWithoutEntityContext().findOne(query, entityClass, collectionName);
+        return getDelegatedTemplateForFindContext(entityClass, query).findOne(query, entityClass, collectionName);
     }
 
     @Override
@@ -190,7 +205,7 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate {
 
     @Override
     public <T> T insert(T objectToSave) {
-        return getDelegatedTemplateWithEntityContext(objectToSave).insert(objectToSave);
+        return getDelegatedTemplateForSaveContext(objectToSave).insert(objectToSave);
     }
 
     @Override
@@ -200,7 +215,7 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate {
 
     @Override
     public <T> T insert(T objectToSave, String collectionName) {
-        return getDelegatedTemplateWithEntityContext(objectToSave).insert(objectToSave, collectionName);
+        return getDelegatedTemplateForSaveContext(objectToSave).insert(objectToSave, collectionName);
     }
 
     @Override
@@ -208,7 +223,9 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate {
         Map<String, List<T>> dividedBatch = new HashMap<>();
 
         for (T entity : batchToSave) {
-            String hint = resolveDatabaseHintWithEntityContext(entity);
+            String hint = getHintResolutionCallbacks()
+                    .callbackForSaveContext((Class<T>) entity.getClass(), entity).map(ShardingHint::getDatabaseHint)
+                    .orElseGet(() -> resolveDatabaseHintWithEntityContext(entity));
             if (!dividedBatch.containsKey(hint)) {
                 dividedBatch.put(hint, new ArrayList<>());
             }
@@ -218,7 +235,8 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate {
         List<T> insertResult = new ArrayList<>();
 
         for (Map.Entry<String, List<T>> entry : dividedBatch.entrySet()) {
-            insertResult.addAll(delegatedShardedMongoTemplateMap.get(entry.getKey()).insert(entry.getValue(), entityClass));
+            insertResult.addAll(Optional.ofNullable(delegatedShardedMongoTemplateMap.get(entry.getKey()))
+                    .orElseThrow(UnresolvableDatabaseShardException::new).insert(entry.getValue(), entityClass));
         }
 
         return insertResult;
@@ -229,7 +247,9 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate {
         Map<String, List<T>> dividedBatch = new HashMap<>();
 
         for (T entity : batchToSave) {
-            String hint = resolveDatabaseHintWithEntityContext(entity);
+            String hint = getHintResolutionCallbacks()
+                    .callbackForSaveContext((Class<T>) entity.getClass(), entity).map(ShardingHint::getDatabaseHint)
+                    .orElseGet(() -> resolveDatabaseHintWithEntityContext(entity));
             if (!dividedBatch.containsKey(hint)) {
                 dividedBatch.put(hint, new ArrayList<>());
             }
@@ -239,7 +259,8 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate {
         List<T> insertResult = new ArrayList<>();
 
         for (Map.Entry<String, List<T>> entry : dividedBatch.entrySet()) {
-            insertResult.addAll(delegatedShardedMongoTemplateMap.get(entry.getKey()).insert(entry.getValue(), collectionName));
+            insertResult.addAll(Optional.ofNullable(delegatedShardedMongoTemplateMap.get(entry.getKey()))
+                    .orElseThrow(UnresolvableDatabaseShardException::new).insert(entry.getValue(), collectionName));
         }
 
         return insertResult;
@@ -250,7 +271,9 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate {
         Map<String, List<T>> dividedBatch = new HashMap<>();
 
         for (T entity : objectsToSave) {
-            String hint = resolveDatabaseHintWithEntityContext(entity);
+            String hint = getHintResolutionCallbacks()
+                    .callbackForSaveContext((Class<T>) entity.getClass(), entity).map(ShardingHint::getDatabaseHint)
+                    .orElseGet(() -> resolveDatabaseHintWithEntityContext(entity));
             if (!dividedBatch.containsKey(hint)) {
                 dividedBatch.put(hint, new ArrayList<>());
             }
@@ -260,7 +283,8 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate {
         List<T> insertResult = new ArrayList<>();
 
         for (Map.Entry<String, List<T>> entry : dividedBatch.entrySet()) {
-            insertResult.addAll(delegatedShardedMongoTemplateMap.get(entry.getKey()).insertAll(entry.getValue()));
+            insertResult.addAll(Optional.ofNullable(delegatedShardedMongoTemplateMap.get(entry.getKey()))
+                    .orElseThrow(UnresolvableDatabaseShardException::new).insertAll(entry.getValue()));
         }
 
         return insertResult;
@@ -273,7 +297,7 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate {
 
     @Override
     public UpdateResult updateFirst(Query query, UpdateDefinition update, Class<?> entityClass) {
-        return getDelegatedTemplateWithoutEntityContext().updateFirst(query, update, entityClass);
+        return getDelegatedTemplateForUpdateContext(entityClass, query, update).updateFirst(query, update, entityClass);
     }
 
     @Override
@@ -283,12 +307,12 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate {
 
     @Override
     public UpdateResult updateFirst(Query query, UpdateDefinition update, Class<?> entityClass, String collectionName) {
-        return getDelegatedTemplateWithoutEntityContext().updateFirst(query, update, entityClass, collectionName);
+        return getDelegatedTemplateForUpdateContext(entityClass, query, update).updateFirst(query, update, entityClass, collectionName);
     }
 
     @Override
     public UpdateResult updateMulti(Query query, UpdateDefinition update, Class<?> entityClass) {
-        return getDelegatedTemplateWithoutEntityContext().updateMulti(query, update, entityClass);
+        return getDelegatedTemplateForUpdateContext(entityClass, query, update).updateMulti(query, update, entityClass);
     }
 
     @Override
@@ -298,12 +322,12 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate {
 
     @Override
     public UpdateResult updateMulti(Query query, UpdateDefinition update, Class<?> entityClass, String collectionName) {
-        return getDelegatedTemplateWithoutEntityContext().updateMulti(query, update, entityClass, collectionName);
+        return getDelegatedTemplateForUpdateContext(entityClass, query, update).updateMulti(query, update, entityClass, collectionName);
     }
 
     @Override
     public UpdateResult upsert(Query query, UpdateDefinition update, Class<?> entityClass) {
-        return getDelegatedTemplateWithoutEntityContext().upsert(query, update, entityClass);
+        return getDelegatedTemplateForUpdateContext(entityClass, query, update).upsert(query, update, entityClass);
     }
 
     @Override
@@ -313,22 +337,22 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate {
 
     @Override
     public UpdateResult upsert(Query query, UpdateDefinition update, Class<?> entityClass, String collectionName) {
-        return getDelegatedTemplateWithoutEntityContext().upsert(query, update, entityClass, collectionName);
+        return getDelegatedTemplateForUpdateContext(entityClass, query, update).upsert(query, update, entityClass, collectionName);
     }
 
     @Override
     public DeleteResult remove(Object object) {
-        return getDelegatedTemplateWithEntityContext(object).remove(object);
+        return getDelegatedTemplateForDeleteContext(object).remove(object);
     }
 
     @Override
     public DeleteResult remove(Object object, String collectionName) {
-        return getDelegatedTemplateWithEntityContext(object).remove(object, collectionName);
+        return getDelegatedTemplateForDeleteContext(object).remove(object, collectionName);
     }
 
     @Override
     public DeleteResult remove(Query query, Class<?> entityClass) {
-        return getDelegatedTemplateWithoutEntityContext().remove(query, entityClass);
+        return getDelegatedTemplateForDeleteContext(entityClass, query).remove(query, entityClass);
     }
 
     @Override
@@ -338,7 +362,7 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate {
 
     @Override
     public DeleteResult remove(Query query, Class<?> entityClass, String collectionName) {
-        return getDelegatedTemplateWithoutEntityContext().remove(query, entityClass, collectionName);
+        return getDelegatedTemplateForDeleteContext(entityClass, query).remove(query, entityClass, collectionName);
     }
 
     @Override
@@ -348,42 +372,42 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate {
 
     @Override
     public <T> T save(T objectToSave) {
-        return getDelegatedTemplateWithEntityContext(objectToSave).save(objectToSave);
+        return getDelegatedTemplateForSaveContext(objectToSave).save(objectToSave);
     }
 
     @Override
     public <T> T save(T objectToSave, String collectionName) {
-        return getDelegatedTemplateWithoutEntityContext().save(objectToSave, collectionName);
+        return getDelegatedTemplateForSaveContext(objectToSave).save(objectToSave, collectionName);
     }
 
     @Override
     public <T> CloseableIterator<T> stream(Query query, Class<T> entityType) {
-        return getDelegatedTemplateWithoutEntityContext().stream(query, entityType);
+        return getDelegatedTemplateForFindContext(entityType, query).stream(query, entityType);
     }
 
     @Override
     public <T> CloseableIterator<T> stream(Query query, Class<T> entityType, String collectionName) {
-        return getDelegatedTemplateWithoutEntityContext().stream(query, entityType, collectionName);
+        return getDelegatedTemplateForFindContext(entityType, query).stream(query, entityType, collectionName);
     }
 
     @Override
     public <T> T findById(Object id, Class<T> entityClass) {
-        return getDelegatedTemplateWithoutEntityContext().findById(id, entityClass);
+        return getDelegatedTemplateForFindContext(entityClass, new Document("_id", id)).findById(id, entityClass);
     }
 
     @Override
     public <T> T findById(Object id, Class<T> entityClass, String collectionName) {
-        return getDelegatedTemplateWithoutEntityContext().findById(id, entityClass, collectionName);
+        return getDelegatedTemplateForFindContext(entityClass, new Document("_id", id)).findById(id, entityClass, collectionName);
     }
 
     @Override
     public <T> List<T> findDistinct(String field, Class<?> entityClass, Class<T> resultClass) {
-        return getDelegatedTemplateWithoutEntityContext().findDistinct(field, entityClass, resultClass);
+        return getDelegatedTemplateForFindContext(entityClass, new Query()).findDistinct(field, entityClass, resultClass);
     }
 
     @Override
     public <T> List<T> findDistinct(Query query, String field, Class<?> entityClass, Class<T> resultClass) {
-        return getDelegatedTemplateWithoutEntityContext().findDistinct(query, field, entityClass, resultClass);
+        return getDelegatedTemplateForFindContext(entityClass, query).findDistinct(query, field, entityClass, resultClass);
     }
 
     @Override
@@ -393,7 +417,7 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate {
 
     @Override
     public <T> List<T> findDistinct(Query query, String field, String collectionName, Class<?> entityClass, Class<T> resultClass) {
-        return getDelegatedTemplateWithoutEntityContext().findDistinct(query, field, collectionName, entityClass, resultClass);
+        return getDelegatedTemplateForFindContext(entityClass, query).findDistinct(query, field, collectionName, entityClass, resultClass);
     }
 
     @Override
@@ -416,13 +440,60 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate {
         return 0;
     }
 
+    private <T> MongoTemplate getDelegatedTemplateForFindContext(Class<T> entityClass, Query query) {
+        Optional<ShardingHint> shardingHint = getHintResolutionCallbacks().callbackForFindContext(entityClass, query);
+        return shardingHint.map(hint -> Optional.ofNullable(this.delegatedShardedMongoTemplateMap.get(hint.getDatabaseHint()))
+                .orElseThrow(UnresolvableDatabaseShardException::new)).orElseGet(this::getDelegatedTemplateWithoutEntityContext);
+    }
+
+    private <T> MongoTemplate getDelegatedTemplateForFindContext(Class<T> entityClass, Document query) {
+        Optional<ShardingHint> shardingHint = getHintResolutionCallbacks().callbackForFindContext(entityClass, query);
+        return shardingHint.map(hint -> Optional.ofNullable(this.delegatedShardedMongoTemplateMap.get(hint.getDatabaseHint()))
+                .orElseThrow(UnresolvableDatabaseShardException::new)).orElseGet(this::getDelegatedTemplateWithoutEntityContext);
+    }
+
+    private <T> MongoTemplate getDelegatedTemplateForDeleteContext(Class<T> entityClass, Query query) {
+        Optional<ShardingHint> shardingHint = getHintResolutionCallbacks().callbackForDeleteContext(entityClass, query);
+        return shardingHint.map(hint -> Optional.ofNullable(this.delegatedShardedMongoTemplateMap.get(hint.getDatabaseHint()))
+                .orElseThrow(UnresolvableDatabaseShardException::new)).orElseGet(this::getDelegatedTemplateWithoutEntityContext);
+    }
+
+    private <T> MongoTemplate getDelegatedTemplateForDeleteContext(Class<T> entityClass, Document query) {
+        Optional<ShardingHint> shardingHint = getHintResolutionCallbacks().callbackForDeleteContext(entityClass, query);
+        return shardingHint.map(hint -> Optional.ofNullable(this.delegatedShardedMongoTemplateMap.get(hint.getDatabaseHint()))
+                .orElseThrow(UnresolvableDatabaseShardException::new)).orElseGet(this::getDelegatedTemplateWithoutEntityContext);
+    }
+
+    private <T> MongoTemplate getDelegatedTemplateForDeleteContext(T entity) {
+        Optional<ShardingHint> shardingHint = getHintResolutionCallbacks().callbackForDeleteContext(entity);
+        return shardingHint.map(hint -> Optional.ofNullable(this.delegatedShardedMongoTemplateMap.get(hint.getDatabaseHint()))
+                .orElseThrow(UnresolvableDatabaseShardException::new)).orElseGet(() -> getDelegatedTemplateWithEntityContext(entity));
+    }
+
+    private <T> MongoTemplate getDelegatedTemplateForUpdateContext(Class<T> entityClass, Query query, UpdateDefinition updateDefinition) {
+        Optional<ShardingHint> shardingHint = getHintResolutionCallbacks().callbackForUpdateContext(entityClass, query, updateDefinition);
+        return shardingHint.map(hint -> Optional.ofNullable(this.delegatedShardedMongoTemplateMap.get(hint.getDatabaseHint()))
+                .orElseThrow(UnresolvableDatabaseShardException::new)).orElseGet(this::getDelegatedTemplateWithoutEntityContext);
+    }
+
+    private <T> MongoTemplate getDelegatedTemplateForUpdateContext(Class<T> entityClass, Document query, UpdateDefinition updateDefinition) {
+        Optional<ShardingHint> shardingHint = getHintResolutionCallbacks().callbackForUpdateContext(entityClass, query, updateDefinition);
+        return shardingHint.map(hint -> Optional.ofNullable(this.delegatedShardedMongoTemplateMap.get(hint.getDatabaseHint()))
+                .orElseThrow(UnresolvableDatabaseShardException::new)).orElseGet(this::getDelegatedTemplateWithoutEntityContext);
+    }
+
+    private <T> MongoTemplate getDelegatedTemplateForSaveContext(T entity) {
+        Optional<ShardingHint> shardingHint = getHintResolutionCallbacks().callbackForSaveContext((Class<T>) entity.getClass(), entity);
+        return shardingHint.map(hint -> Optional.ofNullable(this.delegatedShardedMongoTemplateMap.get(hint.getDatabaseHint()))
+                .orElseThrow(UnresolvableDatabaseShardException::new)).orElseGet(() -> getDelegatedTemplateWithEntityContext(entity));
+    }
+
     private MongoTemplate getDelegatedTemplateWithoutEntityContext() {
         if (delegatedShardedMongoTemplateMap.containsKey(resolveDatabaseHintWithoutEntityContext())) {
             return this.delegatedShardedMongoTemplateMap.get(resolveDatabaseHintWithoutEntityContext());
         } else {
             throw new UnresolvableDatabaseShardException();
         }
-
     }
 
     private <T> MongoTemplate getDelegatedTemplateWithEntityContext(T entity) {

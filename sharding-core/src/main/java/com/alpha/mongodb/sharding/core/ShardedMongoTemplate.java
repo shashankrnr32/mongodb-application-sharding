@@ -1,5 +1,6 @@
 package com.alpha.mongodb.sharding.core;
 
+import com.alpha.mongodb.sharding.core.callback.HintResolutionCallbacks;
 import com.alpha.mongodb.sharding.core.configuration.ShardingOptions;
 import com.alpha.mongodb.sharding.core.exception.UnresolvableCollectionShardException;
 import com.alpha.mongodb.sharding.core.exception.UnresolvableDatabaseShardException;
@@ -7,6 +8,8 @@ import com.alpha.mongodb.sharding.core.hint.ShardingHint;
 import com.alpha.mongodb.sharding.core.hint.ShardingHintManager;
 import com.mongodb.client.MongoClient;
 import lombok.Getter;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
@@ -24,20 +27,31 @@ public abstract class ShardedMongoTemplate extends MongoTemplate {
 
     @Getter
     private final ShardingOptions shardingOptions;
+    @Getter
+    private HintResolutionCallbacks hintResolutionCallbacks;
 
     public ShardedMongoTemplate(MongoClient mongoClient, String databaseName, final ShardingOptions shardingOptions) {
         super(mongoClient, databaseName);
         this.shardingOptions = shardingOptions;
+        hintResolutionCallbacks = new HintResolutionCallbacks(shardingOptions.getHintResolutionCallbacks());
     }
 
     public ShardedMongoTemplate(MongoDatabaseFactory mongoDbFactory, final ShardingOptions shardingOptions) {
         super(mongoDbFactory);
         this.shardingOptions = shardingOptions;
+        hintResolutionCallbacks = new HintResolutionCallbacks(shardingOptions.getHintResolutionCallbacks());
     }
 
     public ShardedMongoTemplate(MongoDatabaseFactory mongoDbFactory, MongoConverter mongoConverter, final ShardingOptions shardingOptions) {
         super(mongoDbFactory, mongoConverter);
         this.shardingOptions = shardingOptions;
+        hintResolutionCallbacks = new HintResolutionCallbacks(shardingOptions.getHintResolutionCallbacks());
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        super.setApplicationContext(applicationContext);
+        hintResolutionCallbacks.discover(applicationContext);
     }
 
     /**

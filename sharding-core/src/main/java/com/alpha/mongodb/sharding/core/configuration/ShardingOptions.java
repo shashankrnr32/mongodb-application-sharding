@@ -1,6 +1,10 @@
 package com.alpha.mongodb.sharding.core.configuration;
 
+import com.alpha.mongodb.sharding.core.callback.HintResolutionCallback;
 import lombok.Data;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Base class for Sharding options.
@@ -14,6 +18,8 @@ public class ShardingOptions {
      * name and the hint
      */
     private String shardSeparator = "_";
+
+    private Set<HintResolutionCallback<?>> hintResolutionCallbacks = new HashSet<>();
 
     /**
      * Provides default implementation to resolve the actual

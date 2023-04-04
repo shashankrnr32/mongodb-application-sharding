@@ -49,12 +49,12 @@ public class CollectionShardedMongoTemplate extends ShardedMongoTemplate {
 
     @Override
     protected <T> DeleteResult doRemove(String collectionName, Query query, Class<T> entityClass, boolean multi) {
-        return super.doRemove(resolveCollectionNameWithoutEntityContext(collectionName), query, entityClass, multi);
+        return super.doRemove(resolveCollectionNameForDeleteContext(collectionName, entityClass, query), query, entityClass, multi);
     }
 
     @Override
     protected <T> T doInsert(String collectionName, T objectToSave, MongoWriter<T> writer) {
-        return super.doInsert(resolveCollectionNameWithEntityContext(collectionName, objectToSave), objectToSave, writer);
+        return super.doInsert(resolveCollectionNameForSaveContext(collectionName, objectToSave), objectToSave, writer);
     }
 
     /**
@@ -69,38 +69,38 @@ public class CollectionShardedMongoTemplate extends ShardedMongoTemplate {
     @Override
     protected <T> Collection<T> doInsertBatch(String collectionName, Collection<? extends T> batchToSave, MongoWriter<T> writer) {
         T firstEntity = (T) CollectionUtils.get(batchToSave, 0);
-        String resolvedCollectionName = resolveCollectionNameWithEntityContext(collectionName, firstEntity);
+        String resolvedCollectionName = resolveCollectionNameForSaveContext(collectionName, firstEntity);
         return super.doInsertBatch(resolvedCollectionName, batchToSave, writer);
     }
 
     @Override
     protected <T> T doSave(String collectionName, T objectToSave, MongoWriter<T> writer) {
-        return super.doSave(resolveCollectionNameWithEntityContext(collectionName, objectToSave), objectToSave, writer);
+        return super.doSave(resolveCollectionNameForSaveContext(collectionName, objectToSave), objectToSave, writer);
     }
 
     @Override
     protected <T> T doFindOne(String collectionName, Document query, Document fields, CursorPreparer preparer, Class<T> entityClass) {
-        return super.doFindOne(resolveCollectionNameWithoutEntityContext(collectionName), query, fields, preparer, entityClass);
+        return super.doFindOne(resolveCollectionNameForFindContext(collectionName, entityClass, query), query, fields, preparer, entityClass);
     }
 
     @Override
     protected <T> List<T> doFind(String collectionName, Document query, Document fields, Class<T> entityClass, CursorPreparer preparer) {
-        return super.doFind(resolveCollectionNameWithoutEntityContext(collectionName), query, fields, entityClass, preparer);
+        return super.doFind(resolveCollectionNameForFindContext(collectionName, entityClass, query), query, fields, entityClass, preparer);
     }
 
     @Override
     protected <T> T doFindAndRemove(String collectionName, Document query, Document fields, Document sort, Collation collation, Class<T> entityClass) {
-        return super.doFindAndRemove(resolveCollectionNameWithoutEntityContext(collectionName), query, fields, sort, collation, entityClass);
+        return super.doFindAndRemove(resolveCollectionNameForDeleteContext(collectionName, entityClass, query), query, fields, sort, collation, entityClass);
     }
 
     @Override
     protected <T> List<T> doFindAndDelete(String collectionName, Query query, Class<T> entityClass) {
-        return super.doFindAndDelete(resolveCollectionNameWithoutEntityContext(collectionName), query, entityClass);
+        return super.doFindAndDelete(resolveCollectionNameForDeleteContext(collectionName, entityClass, query), query, entityClass);
     }
 
     @Override
     protected UpdateResult doUpdate(String collectionName, Query query, UpdateDefinition update, Class<?> entityClass, boolean upsert, boolean multi) {
-        return super.doUpdate(resolveCollectionNameWithoutEntityContext(collectionName), query, update, entityClass, upsert, multi);
+        return super.doUpdate(resolveCollectionNameForUpdateContext(collectionName, entityClass, query, update), query, update, entityClass, upsert, multi);
     }
 
     public long countFromAll(Query query, Class<?> entityClass) {
@@ -145,6 +145,11 @@ public class CollectionShardedMongoTemplate extends ShardedMongoTemplate {
     }
 
     @Override
+    protected MongoCollection<Document> doCreateCollection(String collectionName, Document collectionOptions) {
+        return super.doCreateCollection(resolveCollectionNameWithoutEntityContext(collectionName), collectionOptions);
+    }
+
+    @Override
     protected String resolveCollectionNameWithoutEntityContext(String collectionName) throws UnresolvableCollectionShardException {
         String hint = resolveCollectionHintWithoutEntityContext();
         validateCollectionHint(collectionName, hint);
@@ -174,9 +179,58 @@ public class CollectionShardedMongoTemplate extends ShardedMongoTemplate {
 
     private void validateCollectionHint(final String collectionName, final String hint)
             throws UnresolvableCollectionShardException {
-        if (this.getShardingOptions().validateCollectionHint(collectionName, hint)) {
+        if (!this.getShardingOptions().validateCollectionHint(collectionName, hint)) {
             throw new UnresolvableCollectionShardException();
         }
+    }
+
+    private <T> String resolveCollectionNameForFindContext(String collectionName, Class<T> entityClass, Query query) {
+        Optional<ShardingHint> shardingHint = getHintResolutionCallbacks().callbackForFindContext(entityClass, query);
+        return shardingHint.map(hint -> {
+            validateCollectionHint(collectionName, hint.getCollectionHint());
+            return getShardingOptions().resolveCollectionName(collectionName, hint.getCollectionHint());
+        }).orElseGet(() -> resolveCollectionNameWithoutEntityContext(collectionName));
+    }
+
+    private <T> String resolveCollectionNameForFindContext(String collectionName, Class<T> entityClass, Document query) {
+        Optional<ShardingHint> shardingHint = getHintResolutionCallbacks().callbackForFindContext(entityClass, query);
+        return shardingHint.map(hint -> {
+            validateCollectionHint(collectionName, hint.getCollectionHint());
+            return getShardingOptions().resolveCollectionName(collectionName, hint.getCollectionHint());
+        }).orElseGet(() -> resolveCollectionNameWithoutEntityContext(collectionName));
+    }
+
+    private <T> String resolveCollectionNameForSaveContext(String collectionName, T entity) {
+        Optional<ShardingHint> shardingHint = getHintResolutionCallbacks().callbackForSaveContext((Class<T>) entity.getClass(), entity);
+        if (shardingHint.isPresent()) {
+            return getShardingOptions().resolveCollectionName(collectionName, shardingHint.get().getCollectionHint());
+        } else {
+            return resolveCollectionNameWithEntityContext(collectionName, entity);
+        }
+    }
+
+    private <T> String resolveCollectionNameForUpdateContext(String collectionName, Class<T> entityClass, Query query, UpdateDefinition updateDefinition) {
+        Optional<ShardingHint> shardingHint = getHintResolutionCallbacks().callbackForUpdateContext(entityClass, query, updateDefinition);
+        return shardingHint.map(hint -> {
+            validateCollectionHint(collectionName, hint.getCollectionHint());
+            return getShardingOptions().resolveCollectionName(collectionName, hint.getCollectionHint());
+        }).orElseGet(() -> resolveCollectionNameWithoutEntityContext(collectionName));
+    }
+
+    private <T> String resolveCollectionNameForDeleteContext(String collectionName, Class<T> entityClass, Query query) {
+        Optional<ShardingHint> shardingHint = getHintResolutionCallbacks().callbackForDeleteContext(entityClass, query);
+        return shardingHint.map(hint -> {
+            validateCollectionHint(collectionName, hint.getCollectionHint());
+            return getShardingOptions().resolveCollectionName(collectionName, hint.getCollectionHint());
+        }).orElseGet(() -> resolveCollectionNameWithoutEntityContext(collectionName));
+    }
+
+    private <T> String resolveCollectionNameForDeleteContext(String collectionName, Class<T> entityClass, Document query) {
+        Optional<ShardingHint> shardingHint = getHintResolutionCallbacks().callbackForDeleteContext(entityClass, query);
+        return shardingHint.map(hint -> {
+            validateCollectionHint(collectionName, hint.getCollectionHint());
+            return getShardingOptions().resolveCollectionName(collectionName, hint.getCollectionHint());
+        }).orElseGet(() -> resolveCollectionNameWithoutEntityContext(collectionName));
     }
 
 }

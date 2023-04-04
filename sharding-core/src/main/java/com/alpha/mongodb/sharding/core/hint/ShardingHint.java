@@ -16,7 +16,29 @@ public class ShardingHint {
     private String collectionHint;
 
     ShardingHint(@Nullable ShardingHint copy) {
+        if (copy == null) {
+            return;
+        }
         setDatabaseHint(copy.getDatabaseHint());
         setCollectionHint(copy.getCollectionHint());
+    }
+
+    public static ShardingHint withCollectionHint(String collectionHint) {
+        ShardingHint shardingHint = new ShardingHint();
+        shardingHint.setCollectionHint(collectionHint);
+        return shardingHint;
+    }
+
+    public static ShardingHint withDatabaseHint(String databaseHint) {
+        ShardingHint shardingHint = new ShardingHint();
+        shardingHint.setDatabaseHint(databaseHint);
+        return shardingHint;
+    }
+
+    public static ShardingHint withCompositeHint(String databaseHint, String collectionHint) {
+        ShardingHint shardingHint = new ShardingHint();
+        shardingHint.setDatabaseHint(databaseHint);
+        shardingHint.setCollectionHint(collectionHint);
+        return shardingHint;
     }
 }
