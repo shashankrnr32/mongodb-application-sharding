@@ -43,17 +43,17 @@ public class HintResolutionCallbacks {
         discover(Collections.singleton(callback));
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
     public <T> Optional<HintResolutionCallback<T>> getCallback(Class<T> entityClass) {
         entityClassHintResolutionCallbackCache.computeIfAbsent(entityClass, entityKlass -> {
             for (HintResolutionCallback<?> callback : hintResolutionCallbacks) {
                 ResolvableType[] callbackResolvableTypeArr = ResolvableType.forClass(callback.getClass()).getInterfaces();
                 Optional<ResolvableType> callbackResolvableType = Arrays.stream(callbackResolvableTypeArr).filter(
-                                resolvableType -> Objects.equals(resolvableType.resolve(), HintResolutionCallback.class))
+                                resolvableType -> Objects.equals(resolvableType.resolve(), HintResolutionCallback.class) ||
+                                        Objects.equals(resolvableType.resolve(), CollectionShardedEntityHintResolutionCallback.class) ||
+                                        Objects.equals(resolvableType.resolve(), DatabaseShardedEntityHintResolutionCallback.class) ||
+                                        Objects.equals(resolvableType.resolve(), CompositeShardedEntityHintResolutionCallback.class))
                         .findFirst();
-
-                if (!callbackResolvableType.isPresent()) {
-                    continue;
-                }
 
                 if (Objects.equals(ResolvableType.forClass(entityClass).resolve(),
                         callbackResolvableType.get().getGeneric(0).resolve())) {

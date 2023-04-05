@@ -165,7 +165,7 @@ public class CollectionShardedMongoTemplate extends ShardedMongoTemplate {
             validateCollectionHint(collectionName, hint);
             resolvedCollectionName = getShardingOptions().resolveCollectionName(collectionName, hint);
         } else {
-            Optional<ShardingHint> shardingHint = ShardingHintManager.get();
+            Optional<ShardingHint> shardingHint = ShardingHintManager.getHint();
             if (shardingHint.isPresent() && null != shardingHint.get().getCollectionHint()) {
                 String hint = shardingHint.get().getCollectionHint();
                 validateCollectionHint(collectionName, hint);

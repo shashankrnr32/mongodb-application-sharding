@@ -8,7 +8,7 @@ public interface CompositeShardedEntityHintResolutionCallback<T extends Composit
     default ShardingHint resolveHintForSaveContext(T entity) {
         ShardingHint shardingHint = new ShardingHint();
         shardingHint.setDatabaseHint(entity.resolveDatabaseHint());
-        shardingHint.setDatabaseHint(entity.resolveCollectionHint());
+        shardingHint.setCollectionHint(entity.resolveCollectionHint());
         return shardingHint;
     }
 }

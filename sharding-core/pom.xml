@@ -16,6 +16,7 @@
         <maven.compiler.target>${project.java.version}</maven.compiler.target>
         <spring.data.mongodb.version>3.3.10</spring.data.mongodb.version>
         <mongodb.driver.version>4.4.2</mongodb.driver.version>
+        <maven.plugin.delombok.skip>false</maven.plugin.delombok.skip>
     </properties>
 
     <dependencies>
@@ -67,6 +68,7 @@
                     <outputDirectory>target/docs</outputDirectory>
                     <addOutputDirectory>false</addOutputDirectory>
                     <sourceDirectory>${project.basedir}/src/main/java/</sourceDirectory>
+                    <skip>${maven.plugin.delombok.skip}</skip>
                 </configuration>
                 <executions>
                     <execution>
