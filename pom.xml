@@ -25,6 +25,8 @@
         <maven.compiler.source>${project.java.version}</maven.compiler.source>
         <maven.compiler.target>${project.java.version}</maven.compiler.target>
         <delombok.output>target/docs</delombok.output>
+        <sonar.organization>shashankrnr32</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
 
     <dependencies>
