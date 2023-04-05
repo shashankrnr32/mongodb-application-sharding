@@ -1,13 +1,16 @@
 package com.alpha.mongodb.sharding.core.configuration;
 
+import com.alpha.mongodb.sharding.core.fixtures.TestEntity1;
 import org.junit.Test;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -36,6 +39,14 @@ public class CollectionShardingOptionsTest {
         // Coverage
         String toStringVal = collectionShardingOptions.toString();
         assertNotNull(toStringVal);
+
+        assertTrue(collectionShardingOptions.validateCollectionHint("TEST_COLLECTION", String.valueOf(1)));
+        assertFalse(collectionShardingOptions.validateCollectionHint("TEST_COLLECTION", String.valueOf(5)));
+        assertFalse(collectionShardingOptions.validateCollectionHint("TEST_COLLECTION", null));
+
+        TestEntity1.TestEntity1HintResolutionCallback callback = new TestEntity1.TestEntity1HintResolutionCallback();
+        collectionShardingOptions.setHintResolutionCallbacks(Collections.singleton(callback));
+        assertEquals(1, collectionShardingOptions.getHintResolutionCallbacks().size());
     }
 
 }

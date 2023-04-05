@@ -78,4 +78,12 @@ public class DatabaseShardingOptions extends ShardingOptions {
             return defaultDatabaseHint;
         }
     }
+
+    @Override
+    public boolean validateDatabaseHint(String databaseName, String hint) {
+        if (!super.validateDatabaseHint(databaseName, hint)) {
+            return false;
+        }
+        return getDefaultDatabaseHintsSet().contains(hint);
+    }
 }

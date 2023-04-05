@@ -1,5 +1,6 @@
 package com.alpha.mongodb.sharding.core.configuration;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -9,6 +10,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Composite sharding options
@@ -18,19 +21,24 @@ import java.util.Set;
 @ToString(callSuper = true)
 public class CompositeShardingOptions extends DatabaseShardingOptions {
 
+    @Getter(AccessLevel.PACKAGE)
     private final List<String> defaultCollectionHints;
+
     @Getter
     private final Set<String> defaultCollectionHintsSet;
+
     @Setter
     private String defaultCollectionHint;
 
     // Derived from other set fields
     @Getter
-    private Map<String, List<String>> collectionHints = new HashMap<>();
+    private Map<String, List<String>> collectionHintsMapList = new HashMap<>();
+
     private DelegatedCollectionShardingOptions delegatedCollectionShardingOptions;
+
     @Setter
     @Getter
-    private Map<String, Set<String>> collectionHintsSet = new HashMap<>();
+    private Map<String, Set<String>> collectionHintsMapSet = new HashMap<>();
 
     public CompositeShardingOptions(final List<String> defaultDatabaseHints, final List<String> defaultCollectionHints) {
         super(defaultDatabaseHints);
@@ -46,12 +54,24 @@ public class CompositeShardingOptions extends DatabaseShardingOptions {
         }
     }
 
-    public void setCollectionHints(Map<String, List<String>> collectionHints) {
-        this.collectionHints = collectionHints;
-        collectionHintsSet = new HashMap<>();
-        collectionHints.forEach((collectionName, hints) -> {
-            collectionHintsSet.put(collectionName, new HashSet<>(hints));
+    public void setCollectionHintsMapList(Map<String, List<String>> collectionHintsMapList) {
+        this.collectionHintsMapList = collectionHintsMapList;
+        collectionHintsMapSet = new HashMap<>();
+        collectionHintsMapList.forEach((collectionName, hints) -> {
+            collectionHintsMapSet.put(collectionName, new HashSet<>(hints));
         });
+    }
+
+    @Override
+    public boolean validateCollectionHint(String collectionName, String hint) {
+        if (!super.validateCollectionHint(collectionName, hint)) {
+            return false;
+        }
+
+        Set<String> validCollectionHints = this.getCollectionHintsMapSet().getOrDefault(
+                collectionName, getDefaultCollectionHintsSet());
+
+        return validCollectionHints.contains(hint);
     }
 
     public DelegatedCollectionShardingOptions getDelegatedCollectionShardingOptions() {
@@ -61,36 +81,8 @@ public class CompositeShardingOptions extends DatabaseShardingOptions {
         return delegatedCollectionShardingOptions;
     }
 
-    public static class DelegatedCollectionShardingOptions extends CollectionShardingOptions {
-
-        private final CompositeShardingOptions delegate;
-
-        public DelegatedCollectionShardingOptions(CompositeShardingOptions compositeShardingOptions) {
-            super(compositeShardingOptions.defaultCollectionHints);
-            this.delegate = compositeShardingOptions;
-            this.setCollectionHintsMapList(compositeShardingOptions.getCollectionHints());
-            this.setDefaultCollectionHint(compositeShardingOptions.getDefaultCollectionHint());
-            this.setShardSeparator(compositeShardingOptions.getShardSeparator());
-        }
-
-        @Override
-        public String resolveDatabaseName(String databaseName, String hint) {
-            return delegate.resolveDatabaseName(databaseName, hint);
-        }
-
-        @Override
-        public String resolveCollectionName(String collectionName, String hint) {
-            return delegate.resolveCollectionName(collectionName, hint);
-        }
-
-        @Override
-        public boolean validateCollectionHint(String collectionName, String hint) {
-            return delegate.validateCollectionHint(collectionName, hint);
-        }
-
-        @Override
-        public boolean validateDatabaseHint(String databaseName, String hint) {
-            return delegate.validateDatabaseHint(databaseName, hint);
-        }
+    public static CompositeShardingOptions withIntegerStreamHints(IntStream databaseHintStream, IntStream collectionHintStream) {
+        return new CompositeShardingOptions(databaseHintStream.mapToObj(String::valueOf).collect(Collectors.toList()),
+                collectionHintStream.mapToObj(String::valueOf).collect(Collectors.toList()));
     }
 }

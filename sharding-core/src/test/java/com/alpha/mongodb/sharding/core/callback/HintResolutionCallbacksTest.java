@@ -1,14 +1,11 @@
 package com.alpha.mongodb.sharding.core.callback;
 
-import com.alpha.mongodb.sharding.core.hint.ShardingHint;
-import lombok.Data;
+import com.alpha.mongodb.sharding.core.fixtures.TestEntity1;
+import com.alpha.mongodb.sharding.core.fixtures.TestEntity2;
 import org.bson.Document;
 import org.junit.Test;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.ApplicationContext;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mapping.callback.EntityCallback;
-import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.query.BasicUpdate;
 import org.springframework.data.mongodb.core.query.Query;
 
@@ -93,52 +90,6 @@ public class HintResolutionCallbacksTest {
         HintResolutionCallbacks hintResolutionCallbacks = new HintResolutionCallbacks(Collections.singleton(testEntityHintResolutionCallback));
         Optional<HintResolutionCallback<TestEntity2>> callbackFromClassContext = hintResolutionCallbacks.getCallback(TestEntity2.class);
         assertFalse(callbackFromClassContext.isPresent());
-    }
-
-    @Data
-    @org.springframework.data.mongodb.core.mapping.Document("TEST1")
-    public static class TestEntity1 {
-        @Id
-        private String id;
-
-        @Indexed(unique = true)
-        private String indexedField;
-
-        public static class TestEntity1HintResolutionCallback implements HintResolutionCallback<TestEntity1> {
-
-            @Override
-            public ShardingHint resolveHintForFindContext(Document query, Class<TestEntity1> entityClass) {
-                return ShardingHint.withCollectionHint("0");
-            }
-
-            @Override
-            public ShardingHint resolveHintForSaveContext(TestEntity1 entity) {
-                return ShardingHint.withCollectionHint("0");
-            }
-        }
-    }
-
-    @Data
-    @org.springframework.data.mongodb.core.mapping.Document("TEST2")
-    public static class TestEntity2 {
-        @Id
-        private String id;
-
-        @Indexed(unique = true)
-        private String indexedField;
-
-        public static class TestEntity2HintResolutionCallback implements EntityCallback<TestEntity2>, HintResolutionCallback<TestEntity2> {
-
-            @Override
-            public ShardingHint resolveHintForFindContext(Document query, Class<TestEntity2> entityClass) {
-                return ShardingHint.withCollectionHint("0");
-            }
-
-            @Override
-            public ShardingHint resolveHintForSaveContext(TestEntity2 entity) {
-                return ShardingHint.withCollectionHint("0");
-            }
-        }
     }
 
 
