@@ -2,6 +2,7 @@ package com.alpha.mongodb.sharding.core.callback;
 
 import com.alpha.mongodb.sharding.core.fixtures.TestEntity1;
 import com.alpha.mongodb.sharding.core.fixtures.TestEntity2;
+import com.alpha.mongodb.sharding.core.fixtures.TestEntity3;
 import org.bson.Document;
 import org.junit.Test;
 import org.springframework.beans.factory.ObjectProvider;
@@ -16,6 +17,7 @@ import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -90,6 +92,35 @@ public class HintResolutionCallbacksTest {
         HintResolutionCallbacks hintResolutionCallbacks = new HintResolutionCallbacks(Collections.singleton(testEntityHintResolutionCallback));
         Optional<HintResolutionCallback<TestEntity2>> callbackFromClassContext = hintResolutionCallbacks.getCallback(TestEntity2.class);
         assertFalse(callbackFromClassContext.isPresent());
+    }
+
+    @Test
+    public void testGetCallbackWhenCallbackDiscoveredForExtendedCallbacks() {
+        CollectionShardedEntityHintResolutionCallback<TestEntity3> testEntity3CollectionShardedEntityHintResolutionCallback =
+                new TestEntity3.TestEntity3CollectionHintResolutionCallback();
+        HintResolutionCallbacks hintResolutionCallbacks1 =
+                new HintResolutionCallbacks(Collections.singleton(testEntity3CollectionShardedEntityHintResolutionCallback));
+        assertTrue(hintResolutionCallbacks1.getCallback(TestEntity3.class).isPresent());
+        assertNull(hintResolutionCallbacks1.callbackForSaveContext(TestEntity3.class, new TestEntity3()).get().getDatabaseHint());
+        assertEquals(String.valueOf(0), hintResolutionCallbacks1.callbackForSaveContext(TestEntity3.class, new TestEntity3()).get().getCollectionHint());
+
+        DatabaseShardedEntityHintResolutionCallback<TestEntity3> testEntity3DatabaseShardedEntityHintResolutionCallback =
+                new TestEntity3.TestEntity3DatabaseHintResolutionCallback();
+        HintResolutionCallbacks hintResolutionCallbacks2 =
+                new HintResolutionCallbacks(Collections.singleton(testEntity3DatabaseShardedEntityHintResolutionCallback));
+        assertTrue(hintResolutionCallbacks2.getCallback(TestEntity3.class).isPresent());
+        assertEquals(String.valueOf(0), hintResolutionCallbacks2.callbackForSaveContext(TestEntity3.class, new TestEntity3()).get().getDatabaseHint());
+        assertNull(hintResolutionCallbacks2.callbackForSaveContext(TestEntity3.class, new TestEntity3()).get().getCollectionHint());
+
+        CompositeShardedEntityHintResolutionCallback<TestEntity3> testEntity3CompositeShardedEntityHintResolutionCallback =
+                new TestEntity3.TestEntity3CompositeHintResolutionCallback();
+        HintResolutionCallbacks hintResolutionCallbacks3 =
+                new HintResolutionCallbacks(Collections.singleton(testEntity3CompositeShardedEntityHintResolutionCallback));
+        assertTrue(hintResolutionCallbacks3.getCallback(TestEntity3.class).isPresent());
+        assertEquals(String.valueOf(0), hintResolutionCallbacks3.callbackForSaveContext(TestEntity3.class, new TestEntity3()).get().getDatabaseHint());
+        assertEquals(String.valueOf(0), hintResolutionCallbacks3.callbackForSaveContext(TestEntity3.class, new TestEntity3()).get().getCollectionHint());
+
+
     }
 
 

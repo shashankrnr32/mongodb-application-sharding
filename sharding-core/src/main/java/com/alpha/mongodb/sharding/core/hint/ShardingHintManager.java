@@ -1,5 +1,6 @@
 package com.alpha.mongodb.sharding.core.hint;
 
+import lombok.experimental.UtilityClass;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -12,6 +13,7 @@ import java.util.Optional;
  *
  * @author Shashank Sharma
  */
+@UtilityClass
 public class ShardingHintManager {
 
     private static final ThreadLocal<ShardingHint> hintThreadLocal = new ThreadLocal<>();
@@ -80,7 +82,7 @@ public class ShardingHintManager {
      *
      * @return Optional Hint value
      */
-    public static Optional<ShardingHint> get() {
+    public static Optional<ShardingHint> getHint() {
         return ObjectUtils.isEmpty(hintThreadLocal.get()) ?
                 Optional.empty() : Optional.of(new ShardingHint(hintThreadLocal.get()));
     }
