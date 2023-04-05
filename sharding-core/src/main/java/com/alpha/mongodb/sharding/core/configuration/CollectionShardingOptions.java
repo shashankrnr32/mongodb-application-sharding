@@ -56,9 +56,8 @@ public class CollectionShardingOptions extends ShardingOptions {
     public void setCollectionHintsMapList(Map<String, List<String>> collectionHintsMapList) {
         this.collectionHintsMapList = collectionHintsMapList;
         collectionHintsMapSet = new HashMap<>();
-        collectionHintsMapList.forEach((collectionName, hints) -> {
-            collectionHintsMapSet.put(collectionName, new HashSet<>(hints));
-        });
+        collectionHintsMapList.forEach((collectionName, hints) ->
+                collectionHintsMapSet.put(collectionName, new HashSet<>(hints)));
     }
 
     @Override
