@@ -36,7 +36,6 @@ public class CompositeShardingOptions extends DatabaseShardingOptions {
 
     private DelegatedCollectionShardingOptions delegatedCollectionShardingOptions;
 
-    @Setter
     @Getter
     private Map<String, Set<String>> collectionHintsMapSet = new HashMap<>();
 
