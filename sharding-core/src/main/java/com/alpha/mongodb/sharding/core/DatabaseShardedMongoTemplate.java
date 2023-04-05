@@ -226,9 +226,7 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate {
             String hint = getHintResolutionCallbacks()
                     .callbackForSaveContext((Class<T>) entity.getClass(), entity).map(ShardingHint::getDatabaseHint)
                     .orElseGet(() -> resolveDatabaseHintWithEntityContext(entity));
-            if (!dividedBatch.containsKey(hint)) {
-                dividedBatch.put(hint, new ArrayList<>());
-            }
+            dividedBatch.computeIfAbsent(hint, h -> new ArrayList<>());
             dividedBatch.get(hint).add(entity);
         }
 
@@ -250,9 +248,7 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate {
             String hint = getHintResolutionCallbacks()
                     .callbackForSaveContext((Class<T>) entity.getClass(), entity).map(ShardingHint::getDatabaseHint)
                     .orElseGet(() -> resolveDatabaseHintWithEntityContext(entity));
-            if (!dividedBatch.containsKey(hint)) {
-                dividedBatch.put(hint, new ArrayList<>());
-            }
+            dividedBatch.computeIfAbsent(hint, h -> new ArrayList<>());
             dividedBatch.get(hint).add(entity);
         }
 
@@ -274,9 +270,7 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate {
             String hint = getHintResolutionCallbacks()
                     .callbackForSaveContext((Class<T>) entity.getClass(), entity).map(ShardingHint::getDatabaseHint)
                     .orElseGet(() -> resolveDatabaseHintWithEntityContext(entity));
-            if (!dividedBatch.containsKey(hint)) {
-                dividedBatch.put(hint, new ArrayList<>());
-            }
+            dividedBatch.computeIfAbsent(hint, h -> new ArrayList<>());
             dividedBatch.get(hint).add(entity);
         }
 

@@ -4,6 +4,8 @@
 [![Maven Package](https://github.com/shashankrnr32/mongodb-application-sharding/actions/workflows/maven-publish.yml/badge.svg)](https://github.com/shashankrnr32/mongodb-application-sharding/actions/workflows/maven-publish.yml)
 [![codecov](https://codecov.io/gh/shashankrnr32/mongodb-application-sharding/branch/main/graph/badge.svg?token=U51FX5G10S)](https://codecov.io/gh/shashankrnr32/mongodb-application-sharding)
 
+[![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-black.svg)](https://sonarcloud.io/summary/new_code?id=shashankrnr32_mongodb-application-sharding)
+
 Mongo DB Application Sharding allows you to shard your Mongo DB cluster from your application using different
 strategies. This project is inspired by [Apache's shardingsphere](https://github.com/apache/shardingsphere) which
 enables the users to shard the relational databases through the application.
@@ -251,6 +253,17 @@ a [`UnresolvableShardException`](sharding-core/src/main/java/com/alpha/mongodb/s
 ### Composite Sharding Strategy
 
 Coming soon...!
+
+## Code Analysis
+
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=shashankrnr32_mongodb-application-sharding&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=shashankrnr32_mongodb-application-sharding)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=shashankrnr32_mongodb-application-sharding&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=shashankrnr32_mongodb-application-sharding)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=shashankrnr32_mongodb-application-sharding&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=shashankrnr32_mongodb-application-sharding)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=shashankrnr32_mongodb-application-sharding&metric=bugs)](https://sonarcloud.io/summary/new_code?id=shashankrnr32_mongodb-application-sharding)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=shashankrnr32_mongodb-application-sharding&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=shashankrnr32_mongodb-application-sharding)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=shashankrnr32_mongodb-application-sharding&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=shashankrnr32_mongodb-application-sharding)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=shashankrnr32_mongodb-application-sharding&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=shashankrnr32_mongodb-application-sharding)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=shashankrnr32_mongodb-application-sharding&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=shashankrnr32_mongodb-application-sharding)
 
 ## Author
 

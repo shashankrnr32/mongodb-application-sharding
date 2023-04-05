@@ -1,6 +1,7 @@
 package com.alpha.mongodb.sharding.core.configuration;
 
 import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -19,6 +20,7 @@ import java.util.stream.IntStream;
  * @author SHashank Sharma
  */
 @ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 public class CompositeShardingOptions extends DatabaseShardingOptions {
 
     @Getter(AccessLevel.PACKAGE)
@@ -45,6 +47,11 @@ public class CompositeShardingOptions extends DatabaseShardingOptions {
         defaultCollectionHintsSet = new HashSet<>(defaultCollectionHints);
     }
 
+    public static CompositeShardingOptions withIntegerStreamHints(IntStream databaseHintStream, IntStream collectionHintStream) {
+        return new CompositeShardingOptions(databaseHintStream.mapToObj(String::valueOf).collect(Collectors.toList()),
+                collectionHintStream.mapToObj(String::valueOf).collect(Collectors.toList()));
+    }
+
     public String getDefaultCollectionHint() {
         if (defaultCollectionHint == null) {
             return defaultCollectionHints.get(0);
@@ -56,9 +63,8 @@ public class CompositeShardingOptions extends DatabaseShardingOptions {
     public void setCollectionHintsMapList(Map<String, List<String>> collectionHintsMapList) {
         this.collectionHintsMapList = collectionHintsMapList;
         collectionHintsMapSet = new HashMap<>();
-        collectionHintsMapList.forEach((collectionName, hints) -> {
-            collectionHintsMapSet.put(collectionName, new HashSet<>(hints));
-        });
+        collectionHintsMapList.forEach((collectionName, hints) ->
+                collectionHintsMapSet.put(collectionName, new HashSet<>(hints)));
     }
 
     @Override
@@ -78,10 +84,5 @@ public class CompositeShardingOptions extends DatabaseShardingOptions {
             delegatedCollectionShardingOptions = new DelegatedCollectionShardingOptions(this);
         }
         return delegatedCollectionShardingOptions;
-    }
-
-    public static CompositeShardingOptions withIntegerStreamHints(IntStream databaseHintStream, IntStream collectionHintStream) {
-        return new CompositeShardingOptions(databaseHintStream.mapToObj(String::valueOf).collect(Collectors.toList()),
-                collectionHintStream.mapToObj(String::valueOf).collect(Collectors.toList()));
     }
 }

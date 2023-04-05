@@ -1,5 +1,6 @@
 package com.alpha.mongodb.sharding.core.configuration;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -17,6 +18,7 @@ import java.util.stream.IntStream;
  * @author Shashank Sharma
  */
 @ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 public class DatabaseShardingOptions extends ShardingOptions {
 
     private final List<String> defaultDatabaseHints;

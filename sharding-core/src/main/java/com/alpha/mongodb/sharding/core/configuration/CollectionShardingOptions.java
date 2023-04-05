@@ -1,5 +1,6 @@
 package com.alpha.mongodb.sharding.core.configuration;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -19,6 +20,7 @@ import java.util.stream.IntStream;
  * @author SHashank Sharma
  */
 @ToString(callSuper = true)
+@EqualsAndHashCode(callSuper = true)
 public class CollectionShardingOptions extends ShardingOptions {
 
     private final List<String> defaultCollectionHints;
@@ -56,9 +58,8 @@ public class CollectionShardingOptions extends ShardingOptions {
     public void setCollectionHintsMapList(Map<String, List<String>> collectionHintsMapList) {
         this.collectionHintsMapList = collectionHintsMapList;
         collectionHintsMapSet = new HashMap<>();
-        collectionHintsMapList.forEach((collectionName, hints) -> {
-            collectionHintsMapSet.put(collectionName, new HashSet<>(hints));
-        });
+        collectionHintsMapList.forEach((collectionName, hints) ->
+                collectionHintsMapSet.put(collectionName, new HashSet<>(hints)));
     }
 
     @Override
