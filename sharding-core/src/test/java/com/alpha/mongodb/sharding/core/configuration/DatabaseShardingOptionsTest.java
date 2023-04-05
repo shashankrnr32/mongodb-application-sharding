@@ -5,7 +5,9 @@ import org.junit.Test;
 import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class DatabaseShardingOptionsTest {
 
@@ -20,6 +22,10 @@ public class DatabaseShardingOptionsTest {
         assertEquals(String.valueOf(2), databaseShardingOptions.getDefaultDatabaseHint());
 
         assertEquals("TEST_DB_2", databaseShardingOptions.resolveDatabaseName("TEST_DB", String.valueOf(2)));
+
+        assertTrue(databaseShardingOptions.validateDatabaseHint("TEST_DB", String.valueOf(2)));
+        assertFalse(databaseShardingOptions.validateDatabaseHint("TEST_DB", String.valueOf(5)));
+        assertFalse(databaseShardingOptions.validateDatabaseHint("TEST_DB", null));
 
         // Coverage
         String toStringVal = databaseShardingOptions.toString();

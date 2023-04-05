@@ -22,14 +22,17 @@ import java.util.stream.IntStream;
 public class CollectionShardingOptions extends ShardingOptions {
 
     private final List<String> defaultCollectionHints;
+
     @Getter
     private final Set<String> defaultCollectionHintsSet;
+
     @Setter
     private String defaultCollectionHint;
 
     // Derived from other set fields
     @Getter
     private Map<String, List<String>> collectionHintsMapList = new HashMap<>();
+
     @Getter
     private Map<String, Set<String>> collectionHintsMapSet = new HashMap<>();
 
@@ -60,7 +63,7 @@ public class CollectionShardingOptions extends ShardingOptions {
 
     @Override
     public boolean validateCollectionHint(String collectionName, String hint) {
-        if (null == hint) {
+        if (!super.validateCollectionHint(collectionName, hint)) {
             return false;
         }
 
