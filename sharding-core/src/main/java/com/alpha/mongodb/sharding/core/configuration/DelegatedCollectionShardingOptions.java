@@ -1,5 +1,7 @@
 package com.alpha.mongodb.sharding.core.configuration;
 
+import lombok.EqualsAndHashCode;
+
 /**
  * Delegated Collection Sharding options that is used with CompositeShardingOptions.
  * Use {@link CollectionShardingOptions} for defining sharding options for a collection
@@ -8,6 +10,7 @@ package com.alpha.mongodb.sharding.core.configuration;
  * @author Shashank Sharma
  * @see com.alpha.mongodb.sharding.core.configuration.CollectionShardingOptions
  */
+@EqualsAndHashCode(callSuper = true)
 public class DelegatedCollectionShardingOptions extends CollectionShardingOptions {
 
     private final CompositeShardingOptions delegate;
