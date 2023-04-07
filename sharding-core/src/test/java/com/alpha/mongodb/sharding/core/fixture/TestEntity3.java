@@ -1,4 +1,4 @@
-package com.alpha.mongodb.sharding.core.fixtures;
+package com.alpha.mongodb.sharding.core.fixture;
 
 import com.alpha.mongodb.sharding.core.callback.CollectionShardedEntityHintResolutionCallback;
 import com.alpha.mongodb.sharding.core.callback.CompositeShardedEntityHintResolutionCallback;
@@ -8,12 +8,14 @@ import com.alpha.mongodb.sharding.core.entity.CompositeShardedEntity;
 import com.alpha.mongodb.sharding.core.entity.DatabaseShardedEntity;
 import com.alpha.mongodb.sharding.core.hint.ShardingHint;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 import org.bson.Document;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 
 @Data
 @org.springframework.data.mongodb.core.mapping.Document("TEST3")
+@FieldNameConstants
 public class TestEntity3 implements CollectionShardedEntity, DatabaseShardedEntity, CompositeShardedEntity {
     @Id
     private String id;

@@ -57,15 +57,6 @@ public class CollectionShardedMongoTemplate extends ShardedMongoTemplate {
         return super.doInsert(resolveCollectionNameForSaveContext(collectionName, objectToSave), objectToSave, writer);
     }
 
-    /**
-     * Insert all elements into a collection.
-     *
-     * @param collectionName Base collection name
-     * @param batchToSave    Batch to save
-     * @param writer         Mongo Writer
-     * @param <T>            The entity type
-     * @return Collection of inserted batch
-     */
     @Override
     protected <T> Collection<T> doInsertBatch(String collectionName, Collection<? extends T> batchToSave, MongoWriter<T> writer) {
         T firstEntity = (T) CollectionUtils.get(batchToSave, 0);
