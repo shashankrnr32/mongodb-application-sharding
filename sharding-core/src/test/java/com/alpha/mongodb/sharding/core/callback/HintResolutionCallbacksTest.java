@@ -1,8 +1,8 @@
 package com.alpha.mongodb.sharding.core.callback;
 
-import com.alpha.mongodb.sharding.core.fixtures.TestEntity1;
-import com.alpha.mongodb.sharding.core.fixtures.TestEntity2;
-import com.alpha.mongodb.sharding.core.fixtures.TestEntity3;
+import com.alpha.mongodb.sharding.core.fixture.TestEntity1;
+import com.alpha.mongodb.sharding.core.fixture.TestEntity2;
+import com.alpha.mongodb.sharding.core.fixture.TestEntity3;
 import org.bson.Document;
 import org.junit.Test;
 import org.junit.runner.RunWith;

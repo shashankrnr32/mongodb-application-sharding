@@ -1,14 +1,16 @@
-package com.alpha.mongodb.sharding.core.fixtures;
+package com.alpha.mongodb.sharding.core.fixture;
 
 import com.alpha.mongodb.sharding.core.callback.HintResolutionCallback;
 import com.alpha.mongodb.sharding.core.hint.ShardingHint;
 import lombok.Data;
+import lombok.experimental.FieldNameConstants;
 import org.bson.Document;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 
 @Data
 @org.springframework.data.mongodb.core.mapping.Document("TEST1")
+@FieldNameConstants
 public class TestEntity1 {
     @Id
     private String id;

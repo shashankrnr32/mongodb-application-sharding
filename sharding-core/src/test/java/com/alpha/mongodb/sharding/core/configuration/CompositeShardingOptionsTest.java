@@ -1,6 +1,6 @@
 package com.alpha.mongodb.sharding.core.configuration;
 
-import com.alpha.mongodb.sharding.core.fixtures.TestEntity1;
+import com.alpha.mongodb.sharding.core.fixture.TestEntity1;
 import org.junit.Test;
 
 import java.util.Collections;
