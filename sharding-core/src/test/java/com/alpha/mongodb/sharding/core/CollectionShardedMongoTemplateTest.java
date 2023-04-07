@@ -3,15 +3,18 @@ package com.alpha.mongodb.sharding.core;
 import com.alpha.mongodb.sharding.core.callback.HintResolutionCallback;
 import com.alpha.mongodb.sharding.core.configuration.CollectionShardingOptions;
 import com.alpha.mongodb.sharding.core.exception.UnresolvableCollectionShardException;
+import com.alpha.mongodb.sharding.core.fixtures.ListCollectionsIterableImpl;
 import com.alpha.mongodb.sharding.core.fixtures.TestEntity1;
 import com.alpha.mongodb.sharding.core.fixtures.TestEntity3;
 import com.alpha.mongodb.sharding.core.hint.ShardingHintManager;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.DeleteOptions;
 import lombok.Builder;
 import lombok.Data;
 import org.bson.Document;
+import org.bson.types.ObjectId;
 import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,6 +31,7 @@ import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -181,6 +185,99 @@ public class CollectionShardedMongoTemplateTest {
 
         verify(testEntity3, times(1)).resolveCollectionHint();
         verify(mockCollection).insertOne(any(Document.class));
+    }
+
+    @Test
+    public void testDeleteOne() {
+        MongoTemplate mongoTemplate = getFixture(FixtureConfiguration.builder().registerHintResolutionCallback(true).build());
+
+        MongoDatabase mockMongoDatabase = mock(MongoDatabase.class);
+        mongoDatabaseUtilsMockedStatic.when(() -> MongoDatabaseUtils.getDatabase(eq(mongoTemplate.getMongoDatabaseFactory()), any()))
+                .thenReturn(mockMongoDatabase);
+
+        MongoCollection<Document> mockCollection = mock(MongoCollection.class);
+        when(mockMongoDatabase.getCollection("TEST3_0", Document.class))
+                .thenReturn(mockCollection);
+
+        TestEntity3 testEntity3 = spy(new TestEntity3());
+        testEntity3.setId(ObjectId.get().toString());
+        mongoTemplate.remove(testEntity3);
+
+        verify((HintResolutionCallback<TestEntity3>) collectionShardingOptions.getHintResolutionCallbacks().stream().findFirst().get())
+                .resolveHintForDeleteContext(any(Document.class), eq(TestEntity3.class));
+        verify(mockCollection).deleteOne(any(Document.class), any(DeleteOptions.class));
+    }
+
+    @Test
+    public void testDeleteOneWhenShardHintManuallySet() {
+        MongoTemplate mongoTemplate = getFixture(FixtureConfiguration.getDefault());
+
+        MongoDatabase mockMongoDatabase = mock(MongoDatabase.class);
+        mongoDatabaseUtilsMockedStatic.when(() -> MongoDatabaseUtils.getDatabase(eq(mongoTemplate.getMongoDatabaseFactory()), any()))
+                .thenReturn(mockMongoDatabase);
+
+        MongoCollection<Document> mockCollection = mock(MongoCollection.class);
+        when(mockMongoDatabase.getCollection("TEST3_0", Document.class))
+                .thenReturn(mockCollection);
+
+        TestEntity3 testEntity3 = spy(new TestEntity3());
+        testEntity3.setId(ObjectId.get().toString());
+        ShardingHintManager.setCollectionHint(String.valueOf(0));
+        mongoTemplate.remove(testEntity3);
+
+        verify(mockCollection).deleteOne(any(Document.class), any(DeleteOptions.class));
+    }
+
+    @Test(expected = UnresolvableCollectionShardException.class)
+    public void testDeleteOneWhenShardHintNotSet() {
+        MongoTemplate mongoTemplate = getFixture(FixtureConfiguration.getDefault());
+
+        TestEntity3 testEntity3 = spy(new TestEntity3());
+        testEntity3.setId(ObjectId.get().toString());
+        mongoTemplate.remove(testEntity3);
+    }
+
+    @Test(expected = UnresolvableCollectionShardException.class)
+    public void testDeleteOneWhenCollectionShardHintNotSet() {
+        MongoTemplate mongoTemplate = getFixture(FixtureConfiguration.getDefault());
+
+        TestEntity3 testEntity3 = spy(new TestEntity3());
+        testEntity3.setId(ObjectId.get().toString());
+        ShardingHintManager.setDatabaseHint(String.valueOf(0));
+        mongoTemplate.remove(testEntity3);
+    }
+
+    @Test
+    public void testGetCollection() {
+        MongoTemplate mongoTemplate = getFixture(FixtureConfiguration.getDefault());
+
+        MongoDatabase mockMongoDatabase = mock(MongoDatabase.class);
+        mongoDatabaseUtilsMockedStatic.when(() -> MongoDatabaseUtils.getDatabase(eq(mongoTemplate.getMongoDatabaseFactory()), any()))
+                .thenReturn(mockMongoDatabase);
+
+        MongoCollection<Document> mockCollection = mock(MongoCollection.class);
+        when(mockMongoDatabase.getCollection("TEST3_0", Document.class))
+                .thenReturn(mockCollection);
+
+        ShardingHintManager.setCollectionHint(String.valueOf(0));
+        MongoCollection<Document> mongoCollection = mongoTemplate.getCollection("TEST3");
+        assertEquals(mockCollection, mongoCollection);
+    }
+
+    @Test
+    public void testGetCollectionExists() {
+        MongoTemplate mongoTemplate = getFixture(FixtureConfiguration.getDefault());
+
+        MongoDatabase mockMongoDatabase = mock(MongoDatabase.class);
+        mongoDatabaseUtilsMockedStatic.when(() -> MongoDatabaseUtils.getDatabase(eq(mongoTemplate.getMongoDatabaseFactory()), any()))
+                .thenReturn(mockMongoDatabase);
+
+        MongoCollection<Document> mockCollection = mock(MongoCollection.class);
+        when(mockMongoDatabase.listCollectionNames()).thenReturn(
+                new ListCollectionsIterableImpl(Collections.singletonList("TEST3_0")));
+
+        ShardingHintManager.setCollectionHint(String.valueOf(0));
+        assertTrue(mongoTemplate.collectionExists(TestEntity3.class));
     }
 
     @After
