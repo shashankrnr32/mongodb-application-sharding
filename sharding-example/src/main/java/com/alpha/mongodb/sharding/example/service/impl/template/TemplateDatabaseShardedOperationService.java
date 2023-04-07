@@ -1,5 +1,6 @@
 package com.alpha.mongodb.sharding.example.service.impl.template;
 
+import com.alpha.mongodb.sharding.example.api.models.EntityDTO;
 import com.alpha.mongodb.sharding.example.entity.TestShardedEntity;
 import com.alpha.mongodb.sharding.example.service.ShardedOperationsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,19 +20,19 @@ public class TemplateDatabaseShardedOperationService implements ShardedOperation
     MongoTemplate databaseShardedEntityMongoTemplate;
 
     @Override
-    public Optional<TestShardedEntity> findById(String id) {
-        return Optional.ofNullable(databaseShardedEntityMongoTemplate.findById(id, TestShardedEntity.class));
+    public Optional<EntityDTO> findById(String id) {
+        return Optional.ofNullable(databaseShardedEntityMongoTemplate.findById(id, TestShardedEntity.class)).map(TestShardedEntity::toDTO);
     }
 
     @Override
-    public Optional<TestShardedEntity> findByIndexedField(String indexedFieldValue) {
+    public Optional<EntityDTO> findByIndexedField(String indexedFieldValue) {
         Criteria criteria = Criteria.where(TestShardedEntity.Fields.indexedField).is(indexedFieldValue);
         Query query = new Query(criteria);
-        return Optional.ofNullable(databaseShardedEntityMongoTemplate.findOne(query, TestShardedEntity.class));
+        return Optional.ofNullable(databaseShardedEntityMongoTemplate.findOne(query, TestShardedEntity.class)).map(TestShardedEntity::toDTO);
     }
 
     @Override
-    public void insert(TestShardedEntity entity) {
-        databaseShardedEntityMongoTemplate.insert(entity);
+    public void insert(EntityDTO entity) {
+        databaseShardedEntityMongoTemplate.insert(entity.toEntity());
     }
 }

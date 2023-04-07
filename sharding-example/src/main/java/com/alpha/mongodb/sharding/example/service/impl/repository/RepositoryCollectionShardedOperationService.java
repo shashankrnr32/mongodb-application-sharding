@@ -1,5 +1,6 @@
 package com.alpha.mongodb.sharding.example.service.impl.repository;
 
+import com.alpha.mongodb.sharding.example.api.models.EntityDTO;
 import com.alpha.mongodb.sharding.example.entity.TestShardedEntity;
 import com.alpha.mongodb.sharding.example.repository.collection.CollectionShardedEntityRepository;
 import com.alpha.mongodb.sharding.example.service.ShardedOperationsService;
@@ -15,17 +16,17 @@ public class RepositoryCollectionShardedOperationService implements ShardedOpera
     CollectionShardedEntityRepository collectionShardedEntityRepository;
 
     @Override
-    public Optional<TestShardedEntity> findById(String id) {
-        return collectionShardedEntityRepository.findById(id);
+    public Optional<EntityDTO> findById(String id) {
+        return collectionShardedEntityRepository.findById(id).map(TestShardedEntity::toDTO);
     }
 
     @Override
-    public Optional<TestShardedEntity> findByIndexedField(String indexedFieldValue) {
-        return collectionShardedEntityRepository.findByIndexedField(indexedFieldValue);
+    public Optional<EntityDTO> findByIndexedField(String indexedFieldValue) {
+        return collectionShardedEntityRepository.findByIndexedField(indexedFieldValue).map(TestShardedEntity::toDTO);
     }
 
     @Override
-    public void insert(TestShardedEntity entity) {
-        collectionShardedEntityRepository.insert(entity);
+    public void insert(EntityDTO entity) {
+        collectionShardedEntityRepository.insert(entity.toEntity());
     }
 }

@@ -3,6 +3,7 @@ package com.alpha.mongodb.sharding.example.entity;
 import com.alpha.mongodb.sharding.core.entity.CollectionShardedEntity;
 import com.alpha.mongodb.sharding.core.entity.CompositeShardedEntity;
 import com.alpha.mongodb.sharding.core.entity.DatabaseShardedEntity;
+import com.alpha.mongodb.sharding.example.api.models.EntityDTO;
 import lombok.Data;
 import lombok.experimental.FieldNameConstants;
 import org.springframework.data.annotation.Id;
@@ -28,5 +29,11 @@ public class TestShardedEntity implements CollectionShardedEntity, DatabaseShard
     @Override
     public String resolveDatabaseHint() {
         return String.valueOf(indexedField.charAt(0) - '0');
+    }
+
+    public EntityDTO toDTO() {
+        EntityDTO entityDTO = new EntityDTO();
+        entityDTO.setIndexedField(indexedField);
+        return entityDTO;
     }
 }
