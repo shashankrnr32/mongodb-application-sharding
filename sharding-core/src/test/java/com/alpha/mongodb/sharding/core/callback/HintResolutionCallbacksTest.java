@@ -5,6 +5,8 @@ import com.alpha.mongodb.sharding.core.fixtures.TestEntity2;
 import com.alpha.mongodb.sharding.core.fixtures.TestEntity3;
 import org.bson.Document;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.mongodb.core.query.BasicUpdate;
@@ -23,6 +25,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@RunWith(MockitoJUnitRunner.class)
 public class HintResolutionCallbacksTest {
 
     @Test
