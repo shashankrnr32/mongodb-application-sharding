@@ -85,7 +85,7 @@ public class CollectionShardedMongoTemplateTest {
                 .thenReturn(mockMongoDatabase);
 
         MongoCollection<Document> mockCollection = mock(MongoCollection.class);
-        when(mockMongoDatabase.getCollection(eq("TEST3_0"), eq(Document.class)))
+        when(mockMongoDatabase.getCollection("TEST3_0", Document.class))
                 .thenReturn(mockCollection);
 
         TestEntity3 testEntity3 = spy(new TestEntity3());
@@ -104,7 +104,7 @@ public class CollectionShardedMongoTemplateTest {
                 .thenReturn(mockMongoDatabase);
 
         MongoCollection<Document> mockCollection = mock(MongoCollection.class);
-        when(mockMongoDatabase.getCollection(eq("TEST1_0"), eq(Document.class)))
+        when(mockMongoDatabase.getCollection("TEST1_0", Document.class))
                 .thenReturn(mockCollection);
 
         TestEntity1 testEntity1 = spy(new TestEntity1());
@@ -152,14 +152,14 @@ public class CollectionShardedMongoTemplateTest {
                 .thenReturn(mockMongoDatabase);
 
         MongoCollection<Document> mockCollection = mock(MongoCollection.class);
-        when(mockMongoDatabase.getCollection(eq("TEST3_0"), eq(Document.class)))
+        when(mockMongoDatabase.getCollection("TEST3_0", Document.class))
                 .thenReturn(mockCollection);
 
         TestEntity3 testEntity3 = spy(new TestEntity3());
         TestEntity3 persistedTestEntity3 = mongoTemplate.insert(testEntity3);
 
         verify((HintResolutionCallback<TestEntity3>) collectionShardingOptions.getHintResolutionCallbacks().stream().findFirst().get())
-                .resolveHintForSaveContext(eq(testEntity3));
+                .resolveHintForSaveContext(testEntity3);
         verify(testEntity3, times(1)).resolveCollectionHint();
         verify(mockCollection).insertOne(any(Document.class));
     }
@@ -173,7 +173,7 @@ public class CollectionShardedMongoTemplateTest {
                 .thenReturn(mockMongoDatabase);
 
         MongoCollection<Document> mockCollection = mock(MongoCollection.class);
-        when(mockMongoDatabase.getCollection(eq("TEST3_0"), eq(Document.class)))
+        when(mockMongoDatabase.getCollection("TEST3_0", Document.class))
                 .thenReturn(mockCollection);
 
         TestEntity3 testEntity3 = spy(new TestEntity3());

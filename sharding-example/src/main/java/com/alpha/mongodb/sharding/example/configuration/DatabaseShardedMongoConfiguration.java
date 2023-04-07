@@ -42,11 +42,11 @@ public class DatabaseShardedMongoConfiguration {
     @Bean("databaseShardedMongoTemplate")
     public MongoTemplate databaseShardedMongoTemplate() {
         DatabaseShardingOptions shardingOptions = DatabaseShardingOptions.withIntegerStreamHints(IntStream.range(0, 3));
-        Map<String, MongoDatabaseFactory> factoryMap = new HashMap<String, MongoDatabaseFactory>() {{
-            put(String.valueOf(0), ds0ShardedMongoDbFactory());
-            put(String.valueOf(1), ds1ShardedMongoDbFactory());
-            put(String.valueOf(2), ds2ShardedMongoDbFactory());
-        }};
+        Map<String, MongoDatabaseFactory> factoryMap = new HashMap<>();
+        factoryMap.put(String.valueOf(0), ds0ShardedMongoDbFactory());
+        factoryMap.put(String.valueOf(1), ds1ShardedMongoDbFactory());
+        factoryMap.put(String.valueOf(2), ds2ShardedMongoDbFactory());
+
         return new DatabaseShardedMongoTemplate(factoryMap, shardingOptions);
     }
 }

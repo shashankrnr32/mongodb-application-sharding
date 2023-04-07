@@ -4,7 +4,7 @@ import com.alpha.mongodb.sharding.core.hint.ShardingHintManager;
 import com.alpha.mongodb.sharding.example.api.enumeration.DataSourceType;
 import com.alpha.mongodb.sharding.example.api.enumeration.ShardingType;
 import com.alpha.mongodb.sharding.example.api.factory.ShardingOperationsServiceFactory;
-import com.alpha.mongodb.sharding.example.entity.TestShardedEntity;
+import com.alpha.mongodb.sharding.example.api.models.EntityDTO;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +47,7 @@ public class ShardingOperationsAPI {
     }
 
     @PostMapping(path = "/insert")
-    public ResponseEntity<?> insert(@RequestBody TestShardedEntity testShardedEntity,
+    public ResponseEntity<?> insert(@RequestBody EntityDTO testShardedEntity,
                                     @RequestParam ShardingType shardingType,
                                     @RequestParam DataSourceType dataSourceType) {
         serviceFactory.get(shardingType, dataSourceType).insert(testShardedEntity);
