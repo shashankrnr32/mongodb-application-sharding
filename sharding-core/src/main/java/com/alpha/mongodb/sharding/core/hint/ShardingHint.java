@@ -3,19 +3,18 @@ package com.alpha.mongodb.sharding.core.hint;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.lang.Nullable;
 
 @Data
 @NoArgsConstructor
 public class ShardingHint {
 
-    @Getter(onMethod = @__(@Nullable))
+    @Getter
     private String databaseHint;
 
-    @Getter(onMethod = @__(@Nullable))
+    @Getter
     private String collectionHint;
 
-    ShardingHint(@Nullable ShardingHint copy) {
+    ShardingHint(ShardingHint copy) {
         if (copy == null) {
             return;
         }

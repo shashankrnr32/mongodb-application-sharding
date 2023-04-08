@@ -16,6 +16,7 @@
     <version>${revision}</version>
     <modules>
         <module>sharding-core</module>
+        <module>sharding-spring</module>
         <module>sharding-example</module>
     </modules>
 
@@ -24,16 +25,58 @@
         <project.java.version>1.8</project.java.version>
         <maven.compiler.source>${project.java.version}</maven.compiler.source>
         <maven.compiler.target>${project.java.version}</maven.compiler.target>
+
+        <!-- delombok Configuration -->
         <delombok.output>target/docs</delombok.output>
+        <maven.plugin.delombok.skip>false</maven.plugin.delombok.skip>
+
+        <!-- Sonar Configuration -->
         <sonar.organization>shashankrnr32</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+
+        <!-- Dependencies Versions -->
+        <lombok.version>1.18.26</lombok.version>
+        <apache.commons.lang3.version>3.12.0</apache.commons.lang3.version>
+        <apache.commons.collection.version>3.2.2</apache.commons.collection.version>
+        <spring.data.mongodb.version>3.3.10</spring.data.mongodb.version>
+        <mongodb.driver.version>4.4.2</mongodb.driver.version>
+        <mockito.inline.version>3.12.4</mockito.inline.version>
+
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.26</version>
+            <version>${lombok.version}</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${apache.commons.lang3.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/commons-collections/commons-collections -->
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <version>${apache.commons.collection.version}</version>
+        </dependency>
+
+        <!-- Test Dependencies -->
+        <!-- https://mvnrepository.com/artifact/org.junit/junit -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.mockito/mockito-core -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-inline</artifactId>
+            <version>${mockito.inline.version}</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

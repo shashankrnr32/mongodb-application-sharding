@@ -1,5 +1,6 @@
 package com.alpha.mongodb.sharding.core;
 
+import com.alpha.mongodb.sharding.core.callback.HintResolutionCallback;
 import com.alpha.mongodb.sharding.core.callback.HintResolutionCallbacks;
 import com.alpha.mongodb.sharding.core.configuration.ShardingOptions;
 import com.alpha.mongodb.sharding.core.exception.UnresolvableCollectionShardException;
@@ -17,6 +18,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.lang.Nullable;
 
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Abstract Base Sharded Mongo Template
@@ -28,24 +30,27 @@ public abstract class ShardedMongoTemplate extends MongoTemplate {
     @Getter
     private final ShardingOptions shardingOptions;
     @Getter
-    private HintResolutionCallbacks hintResolutionCallbacks;
+    private final HintResolutionCallbacks hintResolutionCallbacks;
 
-    public ShardedMongoTemplate(MongoClient mongoClient, String databaseName, final ShardingOptions shardingOptions) {
+    protected ShardedMongoTemplate(MongoClient mongoClient, String databaseName, final ShardingOptions shardingOptions) {
         super(mongoClient, databaseName);
         this.shardingOptions = shardingOptions;
-        hintResolutionCallbacks = new HintResolutionCallbacks(shardingOptions.getHintResolutionCallbacks());
+        hintResolutionCallbacks = new HintResolutionCallbacks(
+                (Set<HintResolutionCallback<?>>) shardingOptions.getHintResolutionCallbacks());
     }
 
-    public ShardedMongoTemplate(MongoDatabaseFactory mongoDbFactory, final ShardingOptions shardingOptions) {
+    protected ShardedMongoTemplate(MongoDatabaseFactory mongoDbFactory, final ShardingOptions shardingOptions) {
         super(mongoDbFactory);
         this.shardingOptions = shardingOptions;
-        hintResolutionCallbacks = new HintResolutionCallbacks(shardingOptions.getHintResolutionCallbacks());
+        hintResolutionCallbacks = new HintResolutionCallbacks(
+                (Set<HintResolutionCallback<?>>) shardingOptions.getHintResolutionCallbacks());
     }
 
-    public ShardedMongoTemplate(MongoDatabaseFactory mongoDbFactory, MongoConverter mongoConverter, final ShardingOptions shardingOptions) {
+    ShardedMongoTemplate(MongoDatabaseFactory mongoDbFactory, MongoConverter mongoConverter, final ShardingOptions shardingOptions) {
         super(mongoDbFactory, mongoConverter);
         this.shardingOptions = shardingOptions;
-        hintResolutionCallbacks = new HintResolutionCallbacks(shardingOptions.getHintResolutionCallbacks());
+        hintResolutionCallbacks = new HintResolutionCallbacks(
+                (Set<HintResolutionCallback<?>>) shardingOptions.getHintResolutionCallbacks());
     }
 
     @Override
