@@ -14,11 +14,6 @@
     <artifactId>mongodb-application-sharding</artifactId>
     <packaging>pom</packaging>
     <version>${revision}</version>
-    <modules>
-        <module>sharding-core</module>
-        <module>sharding-spring</module>
-        <module>sharding-example</module>
-    </modules>
 
     <properties>
         <revision>0.0.2</revision>
@@ -43,6 +38,20 @@
         <mockito.inline.version>3.12.4</mockito.inline.version>
 
     </properties>
+
+    <profiles>
+        <profile>
+            <id>all</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>sharding-core</module>
+                <module>sharding-spring</module>
+                <module>sharding-example</module>
+            </modules>
+        </profile>
+    </profiles>
 
     <dependencies>
         <dependency>

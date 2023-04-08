@@ -15,7 +15,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           javadoc-branch: docs
           java-version: 11
-          target-folder: javadoc
+          target-folder: "javadocs"
           project: maven
-          subdirectories: sharding-core sharding-spring
-          custom-command: "mvn -pl sharding-core,sharding-spring javadoc:aggregate"
+          custom-command: >
+            echo "sharding-core sharding-spring" | xargs -d " " -I % mvn -pl % -am javadoc:aggregate
