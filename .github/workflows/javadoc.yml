@@ -16,16 +16,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           javadoc-branch: gh-pages
           java-version: 11
-          target-folder: "javadocs"
           project: maven
           custom-command: >
             echo "sharding-core sharding-spring" | xargs -d " " -I % mvn -pl % -am javadoc:aggregate
-
-      - name: Checkout main
-        uses: actions/checkout@v2
-
-      - name: Deploy docs
-        uses: mhausenblas/mkdocs-deploy-gh-pages@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REQUIREMENTS: docs/requirements.txt
