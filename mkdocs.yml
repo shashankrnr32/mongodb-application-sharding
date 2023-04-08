@@ -1,0 +1,85 @@
+edit_uri: edit/main/docs/
+
+extra:
+  config_override: false
+  doc_owner: Shashank Sharma
+  doc_owner_shortid: shashankrnr32@gmail.com
+  version:
+    provider: mike
+  social:
+    - icon: material/email
+      link: mailto://shashankrnr32@gmail.com
+      name: Shashank Sharma
+    - icon: material/github
+      link: https://github.com/shashankrnr32
+      name: Shashank Sharma
+    - icon: material/twitter
+      link: https://twitter.com/shashankrnr32
+      name: Shashank Sharma
+    - icon: material/linkedin
+      link: https://linkedin.com/in/shashankrnr32
+      name: Shashank Sharma
+
+extra_css: [ ]
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - attr_list
+  - markdown_include.include:
+      base_path: docs
+  - toc:
+      permalink: true
+      toc_depth: 3
+  - pymdownx.arithmatex
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.critic
+  - pymdownx.details
+  - pymdownx.inlinehilite
+  - pymdownx.magiclink
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
+  - pymdownx.emoji:
+      emoji_generator: !!python/name:pymdownx.emoji.to_png
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+  - pymdownx.tabbed
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+
+plugins:
+  - search
+  - awesome-pages
+
+nav:
+  - ...
+
+remote_branch: gh-pages
+remote_name: origin
+repo_name: shashankrnr32/mongodb-application-sharding
+repo_url: https://github.com/shashankrnr32/mongodb-application-sharding
+site_name: Mongo DB Application Sharding
+site_url: https://shashankrnr32.github.io/mongodb-application-sharding/
+site_description: Mongo DB Application Sharding
+strict: false
+
+theme:
+  name: 'material'
+  base_url: https://github.com/shashankrnr32/mongodb-application-sharding
+  language: 'en'
+  features:
+    - navigation.tabs
+  palette:
+    primary: 'white'
+  icon:
+    repo: fontawesome/brands/github
+
+# Not Strictly Copyright :D
+copyright: Maintained by Shashank Sharma
+
+use_directory_urls: true

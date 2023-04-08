@@ -1,0 +1,4 @@
+nav:
+    - Home: index.md
+    - ...
+    - Javadocs: https://shashankrnr32.github.io/mongodb-application-sharding/javadocs
