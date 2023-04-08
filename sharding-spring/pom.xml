@@ -10,7 +10,6 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>sharding-spring</artifactId>
-    <version>${revision}</version>
 
     <properties>
         <maven.compiler.source>${project.java.version}</maven.compiler.source>

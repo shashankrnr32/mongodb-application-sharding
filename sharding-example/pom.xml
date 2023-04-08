@@ -40,8 +40,6 @@
             <artifactId>spring-boot-starter-tomcat</artifactId>
             <version>${spring.boot.version}</version>
         </dependency>
-
-
     </dependencies>
 
 </project>
