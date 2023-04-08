@@ -18,12 +18,11 @@ jobs:
           java-version: 11
           target-folder: "javadocs"
           project: maven
-          subdirectories: site
           custom-command: >
             echo "sharding-core sharding-spring" | xargs -d " " -I % mvn -pl % -am javadoc:aggregate
 
             mkdir site
-            
+
             cp -r target/site site
 
       - name: Checkout main
