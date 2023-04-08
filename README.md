@@ -22,10 +22,10 @@ To use this library in your project, just add the package `sharding-core`
 as a dependency to your project.
 
 ```xml
-<!-- sharding-core -->
+<!-- sharding-spring -->
 <dependency>
     <groupId>com.alpha.mongodb</groupId>
-    <artifactId>sharding-core</artifactId>
+    <artifactId>sharding-spring</artifactId>
     <version>${mongodb.sharding.version}</version>
 </dependency>
 ```

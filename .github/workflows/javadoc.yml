@@ -17,5 +17,5 @@ jobs:
           java-version: 11
           target-folder: javadoc
           project: maven
-          subdirectories: sharding-core
-          custom-command: "mvn -pl sharding-core javadoc:aggregate"
+          subdirectories: sharding-core sharding-spring
+          custom-command: "mvn -pl sharding-core,sharding-spring javadoc:aggregate"

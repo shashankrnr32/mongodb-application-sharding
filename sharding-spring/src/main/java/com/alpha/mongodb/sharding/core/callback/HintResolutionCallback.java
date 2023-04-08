@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.UpdateDefinition;
 import org.springframework.lang.Nullable;
 
-public interface HintResolutionCallback<T> {
+public interface HintResolutionCallback<T> extends IHintResolutionCallback {
 
     ShardingHint resolveHintForFindContext(Document query, Class<T> entityClass);
 
