@@ -27,8 +27,12 @@ import org.springframework.data.mongodb.MongoDatabaseUtils;
 import org.springframework.data.mongodb.core.MongoExceptionTranslator;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
+import org.springframework.data.mongodb.core.query.BasicUpdate;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.UpdateDefinition;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertEquals;
@@ -367,6 +371,136 @@ public class CollectionShardedMongoTemplateTest {
         TestEntity3 testEntity3 = mongoTemplate.findById(ObjectId.get(), TestEntity3.class);
         assertNotNull(testEntity3);
         assertEquals(objectId.toString(), testEntity3.getId());
+    }
+
+    @Test
+    public void testUpdate() {
+        MongoTemplate mongoTemplate = getFixture(FixtureConfiguration.builder().registerHintResolutionCallback(true).build());
+
+        MongoDatabase mockMongoDatabase = mock(MongoDatabase.class);
+        mongoDatabaseUtilsMockedStatic.when(() -> MongoDatabaseUtils.getDatabase(eq(mongoTemplate.getMongoDatabaseFactory()), any()))
+                .thenReturn(mockMongoDatabase);
+
+        MongoCollection<Document> mockCollection = mock(MongoCollection.class);
+        when(mockMongoDatabase.getCollection("TEST3_0", Document.class))
+                .thenReturn(mockCollection);
+
+        Query updateQuery = new Query();
+        UpdateDefinition updateDefinition = new BasicUpdate(new Document()).addToSet("indexedField", "testIndexedValue");
+        mongoTemplate.updateMulti(updateQuery, updateDefinition, TestEntity3.class);
+
+        verify((HintResolutionCallback<TestEntity3>) collectionShardingOptions.getHintResolutionCallbacks().stream().findFirst().get())
+                .resolveHintForUpdateContext(updateQuery, updateDefinition, TestEntity3.class);
+    }
+
+    @Test
+    public void testUpdateWhenShardHintManuallySet() {
+        MongoTemplate mongoTemplate = getFixture(FixtureConfiguration.getDefault());
+
+        MongoDatabase mockMongoDatabase = mock(MongoDatabase.class);
+        mongoDatabaseUtilsMockedStatic.when(() -> MongoDatabaseUtils.getDatabase(eq(mongoTemplate.getMongoDatabaseFactory()), any()))
+                .thenReturn(mockMongoDatabase);
+
+        MongoCollection<Document> mockCollection = mock(MongoCollection.class);
+        when(mockMongoDatabase.getCollection("TEST3_0", Document.class))
+                .thenReturn(mockCollection);
+
+        Query updateQuery = new Query();
+        UpdateDefinition updateDefinition = new BasicUpdate(new Document()).addToSet("indexedField", "testIndexedValue");
+        ShardingHintManager.setCollectionHint(String.valueOf(0));
+        mongoTemplate.updateMulti(updateQuery, updateDefinition, TestEntity3.class);
+    }
+
+    @Test
+    public void testFindAndRemove() {
+        MongoTemplate mongoTemplate = getFixture(FixtureConfiguration.builder().registerHintResolutionCallback(true).build());
+
+        MongoDatabase mockMongoDatabase = mock(MongoDatabase.class);
+        mongoDatabaseUtilsMockedStatic.when(() -> MongoDatabaseUtils.getDatabase(eq(mongoTemplate.getMongoDatabaseFactory()), any()))
+                .thenReturn(mockMongoDatabase);
+
+        MongoCollection<Document> mockCollection = mock(MongoCollection.class);
+        when(mockMongoDatabase.getCollection("TEST3_0", Document.class))
+                .thenReturn(mockCollection);
+
+        Query deleteQuery = new Query();
+        mongoTemplate.findAndRemove(deleteQuery, TestEntity3.class);
+
+        verify((HintResolutionCallback<TestEntity3>) collectionShardingOptions.getHintResolutionCallbacks().stream().findFirst().get())
+                .resolveHintForDeleteContext(deleteQuery.getQueryObject(), TestEntity3.class);
+    }
+
+    @Test
+    public void testFindAndRemoveWhenShardHintManuallySet() {
+        MongoTemplate mongoTemplate = getFixture(FixtureConfiguration.getDefault());
+
+        MongoDatabase mockMongoDatabase = mock(MongoDatabase.class);
+        mongoDatabaseUtilsMockedStatic.when(() -> MongoDatabaseUtils.getDatabase(eq(mongoTemplate.getMongoDatabaseFactory()), any()))
+                .thenReturn(mockMongoDatabase);
+
+        MongoCollection<Document> mockCollection = mock(MongoCollection.class);
+        when(mockMongoDatabase.getCollection("TEST3_0", Document.class))
+                .thenReturn(mockCollection);
+
+        Query deleteQuery = new Query();
+        ShardingHintManager.setCollectionHint(String.valueOf(0));
+        mongoTemplate.findAndRemove(deleteQuery, TestEntity3.class);
+    }
+
+    @Test
+    public void testFind() {
+        MongoTemplate mongoTemplate = getFixture(FixtureConfiguration.builder().registerHintResolutionCallback(true).build());
+
+        MongoDatabase mockMongoDatabase = mock(MongoDatabase.class);
+        mongoDatabaseUtilsMockedStatic.when(() -> MongoDatabaseUtils.getDatabase(eq(mongoTemplate.getMongoDatabaseFactory()), any()))
+                .thenReturn(mockMongoDatabase);
+
+        MongoCollection<Document> mockCollection = mock(MongoCollection.class);
+        when(mockMongoDatabase.getCollection("TEST3_0", Document.class))
+                .thenReturn(mockCollection);
+
+        ObjectId objectId = ObjectId.get();
+        Document documentFound = new Document();
+        documentFound.put("_id", objectId);
+        documentFound.put(TestEntity3.Fields.indexedField, "testIndexedFieldValue");
+        when(mockCollection.find(any(Document.class), eq(Document.class)))
+                .thenReturn(new FindFromDatabaseIterable(Collections.singletonList(documentFound)));
+
+        Query findQuery = new Query();
+        ShardingHintManager.setCollectionHint(String.valueOf(0));
+        List<TestEntity3> queryResult = mongoTemplate.find(findQuery, TestEntity3.class);
+
+        assertEquals(1, queryResult.size());
+        assertEquals(objectId.toString(), queryResult.get(0).getId());
+        verify((HintResolutionCallback<TestEntity3>) collectionShardingOptions.getHintResolutionCallbacks().stream().findFirst().get())
+                .resolveHintForFindContext(findQuery.getQueryObject(), TestEntity3.class);
+    }
+
+    @Test
+    public void testFindWhenShardHintManuallySet() {
+        MongoTemplate mongoTemplate = getFixture(FixtureConfiguration.getDefault());
+
+        MongoDatabase mockMongoDatabase = mock(MongoDatabase.class);
+        mongoDatabaseUtilsMockedStatic.when(() -> MongoDatabaseUtils.getDatabase(eq(mongoTemplate.getMongoDatabaseFactory()), any()))
+                .thenReturn(mockMongoDatabase);
+
+        MongoCollection<Document> mockCollection = mock(MongoCollection.class);
+        when(mockMongoDatabase.getCollection("TEST3_0", Document.class))
+                .thenReturn(mockCollection);
+
+        ObjectId objectId = ObjectId.get();
+        Document documentFound = new Document();
+        documentFound.put("_id", objectId);
+        documentFound.put(TestEntity3.Fields.indexedField, "testIndexedFieldValue");
+        when(mockCollection.find(any(Document.class), eq(Document.class)))
+                .thenReturn(new FindFromDatabaseIterable(Collections.singletonList(documentFound)));
+
+        Query findQuery = new Query();
+        ShardingHintManager.setCollectionHint(String.valueOf(0));
+        List<TestEntity3> queryResult = mongoTemplate.find(findQuery, TestEntity3.class);
+
+        assertEquals(1, queryResult.size());
+        assertEquals(objectId.toString(), queryResult.get(0).getId());
     }
 
 

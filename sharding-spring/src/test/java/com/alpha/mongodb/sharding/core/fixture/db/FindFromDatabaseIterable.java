@@ -82,7 +82,7 @@ public class FindFromDatabaseIterable implements FindIterable<Document> {
 
     @Override
     public FindIterable<Document> projection(Bson bson) {
-        return null;
+        return this;
     }
 
     @Override
