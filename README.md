@@ -35,10 +35,11 @@ as a dependency to your project.
 ## Features
 
 1. Supports 3 different sharding strategies for Spring / Spring Boot projects by extending MongoTemplate.
-2. Hint Resolution through ThreadLocal and callback based mechanism.
-3. Automatic Hint Resolution Callback discovery for Spring Beans using ApplicationContext
-4. Custom configuration available for Sharding, validation of shards etc.
-5. Tested using Spring's Mongo Template and Repository
+2. Supports Reactive Mongo Templates (for all the sharding strategies)
+3. Hint Resolution through ThreadLocal and callback based mechanism.
+4. Automatic Hint Resolution Callback discovery for Spring Beans using ApplicationContext
+5. Custom configuration available for Sharding, validation of shards etc.
+6. Tested using Spring's Mongo Template and Repository
 
 ## Code Analysis
 
