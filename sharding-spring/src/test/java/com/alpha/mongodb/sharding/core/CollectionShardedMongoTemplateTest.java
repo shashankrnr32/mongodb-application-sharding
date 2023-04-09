@@ -448,7 +448,6 @@ public class CollectionShardedMongoTemplateTest {
         documentFound.put(TestEntity3.Fields.indexedField, "testIndexedFieldValue");
         when(mockCollection.find(any(Document.class), eq(Document.class)))
                 .thenReturn(new FindFromDatabaseIterable(Collections.singletonList(documentFound)));
-        when(mockCollection.withWriteConcern(any())).thenReturn(mockCollection);
 
         Query deleteQuery = new Query();
         mongoTemplate.findAllAndRemove(deleteQuery, TestEntity3.class);
@@ -475,7 +474,6 @@ public class CollectionShardedMongoTemplateTest {
         documentFound.put(TestEntity3.Fields.indexedField, "testIndexedFieldValue");
         when(mockCollection.find(any(Document.class), eq(Document.class)))
                 .thenReturn(new FindFromDatabaseIterable(Collections.singletonList(documentFound)));
-        when(mockCollection.withWriteConcern(any())).thenReturn(mockCollection);
 
         Query deleteQuery = new Query();
         ShardingHintManager.setCollectionHint(String.valueOf(0));
