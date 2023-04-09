@@ -33,12 +33,13 @@ public class ShardingOperationsAPI {
                                       @RequestParam @Nullable String collectionShardHint,
                                       @RequestParam @Nullable String databaseShardHint,
                                       @RequestParam ShardingType shardingType,
-                                      @RequestParam DataSourceType dataSourceType) {
+                                      @RequestParam DataSourceType dataSourceType,
+                                      @RequestParam boolean reactive) {
         if (StringUtils.isNotBlank(collectionShardHint)) {
             ShardingHintManager.setCollectionHint(collectionShardHint);
             ShardingHintManager.setDatabaseHint(databaseShardHint);
         }
-        Optional<?> entityOptional = serviceFactory.get(shardingType, dataSourceType).findById(id);
+        Optional<?> entityOptional = serviceFactory.get(shardingType, dataSourceType, reactive).findById(id);
         if (entityOptional.isPresent()) {
             return ResponseEntity.ok(entityOptional);
         } else {
@@ -49,8 +50,9 @@ public class ShardingOperationsAPI {
     @PostMapping(path = "/insert")
     public ResponseEntity<?> insert(@RequestBody EntityDTO testShardedEntity,
                                     @RequestParam ShardingType shardingType,
-                                    @RequestParam DataSourceType dataSourceType) {
-        serviceFactory.get(shardingType, dataSourceType).insert(testShardedEntity);
+                                    @RequestParam DataSourceType dataSourceType,
+                                    @RequestParam boolean reactive) {
+        serviceFactory.get(shardingType, dataSourceType, reactive).insert(testShardedEntity);
         return ResponseEntity.noContent().build();
     }
 

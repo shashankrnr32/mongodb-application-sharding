@@ -1,4 +1,4 @@
-package com.alpha.mongodb.sharding.example.repository.collection;
+package com.alpha.mongodb.sharding.example.repository.collection.template;
 
 import com.alpha.mongodb.sharding.example.entity.TestShardedEntity;
 import org.springframework.data.mongodb.repository.MongoRepository;

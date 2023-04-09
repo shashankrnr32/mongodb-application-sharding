@@ -2,7 +2,7 @@ package com.alpha.mongodb.sharding.example.service.impl.repository;
 
 import com.alpha.mongodb.sharding.example.api.models.EntityDTO;
 import com.alpha.mongodb.sharding.example.entity.TestShardedEntity;
-import com.alpha.mongodb.sharding.example.repository.collection.CollectionShardedEntityRepository;
+import com.alpha.mongodb.sharding.example.repository.collection.template.CollectionShardedEntityRepository;
 import com.alpha.mongodb.sharding.example.service.ShardedOperationsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
