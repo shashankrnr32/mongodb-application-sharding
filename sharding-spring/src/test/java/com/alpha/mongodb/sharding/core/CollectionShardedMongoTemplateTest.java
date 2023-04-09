@@ -431,6 +431,59 @@ public class CollectionShardedMongoTemplateTest {
     }
 
     @Test
+    public void testFindAllAndRemove() {
+        MongoTemplate mongoTemplate = getFixture(FixtureConfiguration.builder().registerHintResolutionCallback(true).build());
+
+        MongoDatabase mockMongoDatabase = mock(MongoDatabase.class);
+        mongoDatabaseUtilsMockedStatic.when(() -> MongoDatabaseUtils.getDatabase(eq(mongoTemplate.getMongoDatabaseFactory()), any()))
+                .thenReturn(mockMongoDatabase);
+
+        MongoCollection<Document> mockCollection = mock(MongoCollection.class);
+        when(mockMongoDatabase.getCollection("TEST3_0", Document.class))
+                .thenReturn(mockCollection);
+
+        ObjectId objectId = ObjectId.get();
+        Document documentFound = new Document();
+        documentFound.put("_id", objectId);
+        documentFound.put(TestEntity3.Fields.indexedField, "testIndexedFieldValue");
+        when(mockCollection.find(any(Document.class), eq(Document.class)))
+                .thenReturn(new FindFromDatabaseIterable(Collections.singletonList(documentFound)));
+        when(mockCollection.withWriteConcern(any())).thenReturn(mockCollection);
+
+        Query deleteQuery = new Query();
+        mongoTemplate.findAllAndRemove(deleteQuery, TestEntity3.class);
+
+        verify((HintResolutionCallback<TestEntity3>) collectionShardingOptions.getHintResolutionCallbacks().stream().findFirst().get())
+                .resolveHintForDeleteContext(deleteQuery.getQueryObject(), TestEntity3.class);
+    }
+
+    @Test
+    public void testFindAllAndRemoveWhenShardHintIsManuallySet() {
+        MongoTemplate mongoTemplate = getFixture(FixtureConfiguration.getDefault());
+
+        MongoDatabase mockMongoDatabase = mock(MongoDatabase.class);
+        mongoDatabaseUtilsMockedStatic.when(() -> MongoDatabaseUtils.getDatabase(eq(mongoTemplate.getMongoDatabaseFactory()), any()))
+                .thenReturn(mockMongoDatabase);
+
+        MongoCollection<Document> mockCollection = mock(MongoCollection.class);
+        when(mockMongoDatabase.getCollection("TEST3_0", Document.class))
+                .thenReturn(mockCollection);
+
+        ObjectId objectId = ObjectId.get();
+        Document documentFound = new Document();
+        documentFound.put("_id", objectId);
+        documentFound.put(TestEntity3.Fields.indexedField, "testIndexedFieldValue");
+        when(mockCollection.find(any(Document.class), eq(Document.class)))
+                .thenReturn(new FindFromDatabaseIterable(Collections.singletonList(documentFound)));
+        when(mockCollection.withWriteConcern(any())).thenReturn(mockCollection);
+
+        Query deleteQuery = new Query();
+        ShardingHintManager.setCollectionHint(String.valueOf(0));
+        mongoTemplate.findAllAndRemove(deleteQuery, TestEntity3.class);
+    }
+
+
+    @Test
     public void testFindAndRemoveWhenShardHintManuallySet() {
         MongoTemplate mongoTemplate = getFixture(FixtureConfiguration.getDefault());
 

@@ -82,7 +82,13 @@ public class CollectionShardedMongoTemplate extends ShardedMongoTemplate impleme
 
     @Override
     protected <T> List<T> doFindAndDelete(String collectionName, Query query, Class<T> entityClass) {
-        return super.doFindAndDelete(resolveCollectionNameForDeleteContext(collectionName, entityClass, query), query, entityClass);
+        List<T> result = find(query, entityClass, collectionName);
+
+        if (!org.springframework.util.CollectionUtils.isEmpty(result)) {
+            remove(query, entityClass, collectionName);
+        }
+
+        return result;
     }
 
     @Override
