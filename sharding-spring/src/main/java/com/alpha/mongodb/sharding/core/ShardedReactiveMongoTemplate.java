@@ -16,7 +16,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 /**
- * Abstract Base Sharded Mongo Template
+ * Abstract Base Sharded Reactive Mongo Template
  *
  * @author Shashank Sharma
  */
