@@ -15,10 +15,14 @@ import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.data.mongodb.core.CursorPreparer;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
 import org.springframework.data.mongodb.core.convert.MongoWriter;
+import org.springframework.data.mongodb.core.mapping.MongoPersistentEntity;
 import org.springframework.data.mongodb.core.query.Collation;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.UpdateDefinition;
 import org.springframework.lang.Nullable;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 import java.util.Collection;
 import java.util.List;
@@ -84,8 +88,22 @@ public class CollectionShardedMongoTemplate extends ShardedMongoTemplate impleme
     protected <T> List<T> doFindAndDelete(String collectionName, Query query, Class<T> entityClass) {
         List<T> result = find(query, entityClass, collectionName);
 
+        MongoPersistentEntity<T> persistentEntity =
+                (MongoPersistentEntity<T>) this.getConverter().getMappingContext().getPersistentEntity(entityClass);
+
+        MultiValueMap<String, Object> byIds = new LinkedMultiValueMap<>();
+        result.stream().forEach(resultEntry -> {
+            byIds.add("_id", persistentEntity.getPropertyAccessor(resultEntry).getProperty(
+                    persistentEntity.getIdProperty()));
+        });
+
+        Criteria[] criterias = byIds.entrySet().stream() //
+                .map(it -> Criteria.where(it.getKey()).in(it.getValue())) //
+                .toArray(Criteria[]::new);
+
         if (!org.springframework.util.CollectionUtils.isEmpty(result)) {
-            remove(query, entityClass, collectionName);
+            remove(new Query(criterias.length == 1 ? criterias[0] : new Criteria().orOperator(criterias)),
+                    entityClass, collectionName);
         }
 
         return result;
