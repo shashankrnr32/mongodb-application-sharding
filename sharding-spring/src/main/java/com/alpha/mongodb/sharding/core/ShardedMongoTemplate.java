@@ -1,12 +1,9 @@
 package com.alpha.mongodb.sharding.core;
 
+import com.alpha.mongodb.sharding.core.assitant.ShardingAssistant;
 import com.alpha.mongodb.sharding.core.callback.HintResolutionCallback;
 import com.alpha.mongodb.sharding.core.callback.HintResolutionCallbacks;
 import com.alpha.mongodb.sharding.core.configuration.ShardingOptions;
-import com.alpha.mongodb.sharding.core.exception.UnresolvableCollectionShardException;
-import com.alpha.mongodb.sharding.core.exception.UnresolvableDatabaseShardException;
-import com.alpha.mongodb.sharding.core.hint.ShardingHint;
-import com.alpha.mongodb.sharding.core.hint.ShardingHintManager;
 import com.mongodb.client.MongoClient;
 import lombok.Getter;
 import org.springframework.beans.BeansException;
@@ -17,7 +14,6 @@ import org.springframework.data.mongodb.core.convert.MongoConverter;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.lang.Nullable;
 
-import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -25,7 +21,7 @@ import java.util.Set;
  *
  * @author Shashank Sharma
  */
-public abstract class ShardedMongoTemplate extends MongoTemplate {
+public abstract class ShardedMongoTemplate extends MongoTemplate implements ShardingAssistant {
 
     @Getter
     private final ShardingOptions shardingOptions;
@@ -94,48 +90,4 @@ public abstract class ShardedMongoTemplate extends MongoTemplate {
      * @return Base collection Name
      */
     public abstract long estimatedCountFromAllShards(String collectionName);
-
-    protected String resolveCollectionHintWithoutEntityContext() throws UnresolvableCollectionShardException {
-        Optional<ShardingHint> hint = ShardingHintManager.getHint();
-        if (hint.isPresent() && null != hint.get().getCollectionHint()) {
-            return hint.get().getCollectionHint();
-        } else {
-            throw new UnresolvableCollectionShardException();
-        }
-    }
-
-    protected String resolveDatabaseHintWithoutEntityContext() throws UnresolvableDatabaseShardException {
-        Optional<ShardingHint> hint = ShardingHintManager.getHint();
-        if (hint.isPresent() && null != hint.get().getDatabaseHint()) {
-            return hint.get().getDatabaseHint();
-        } else {
-            throw new UnresolvableCollectionShardException();
-        }
-    }
-
-    /**
-     * Resolve the collection name when there is no entity context. Here, {@link ShardingHintManager} is used
-     * to determine the collection.
-     *
-     * @param collectionName Base Collection Name
-     * @return Resolved Collection Name
-     * @throws UnresolvableCollectionShardException when the flow is unable to determine the hint
-     */
-    protected String resolveCollectionNameWithoutEntityContext(final String collectionName)
-            throws UnresolvableCollectionShardException {
-        return this.shardingOptions.resolveCollectionName(collectionName, resolveCollectionHintWithoutEntityContext());
-    }
-
-    /**
-     * Resolve the database name when there is no entity context. Here, {@link ShardingHintManager} is used
-     * to determine the database name.
-     *
-     * @param databaseName Base Database Name
-     * @return Resolved Collection Name
-     * @throws UnresolvableCollectionShardException when the flow is unable to determine the hint
-     */
-    protected String resolveDatabaseNameWithoutEntityContext(final String databaseName)
-            throws UnresolvableDatabaseShardException {
-        return this.shardingOptions.resolveDatabaseName(databaseName, resolveDatabaseHintWithoutEntityContext());
-    }
 }
