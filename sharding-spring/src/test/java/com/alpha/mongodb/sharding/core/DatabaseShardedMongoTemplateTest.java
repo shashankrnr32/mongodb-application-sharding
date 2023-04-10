@@ -2,11 +2,13 @@ package com.alpha.mongodb.sharding.core;
 
 import com.alpha.mongodb.sharding.core.configuration.DatabaseShardingOptions;
 import com.alpha.mongodb.sharding.core.exception.UnresolvableDatabaseShardException;
+import com.alpha.mongodb.sharding.core.fixture.TestEntity1;
 import com.alpha.mongodb.sharding.core.fixture.TestEntity3;
 import com.alpha.mongodb.sharding.core.hint.ShardingHintManager;
 import com.mongodb.client.MongoClient;
 import lombok.Builder;
 import lombok.Data;
+import org.bson.types.ObjectId;
 import org.junit.After;
 import org.junit.Test;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
@@ -22,6 +24,8 @@ import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -125,6 +129,22 @@ public class DatabaseShardedMongoTemplateTest {
         verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
                 .findDistinct(query, "indexedField", "TEST3", TestEntity3.class);
 
+        ObjectId objectId = ObjectId.get();
+        databaseShardedMongoTemplate.findById(objectId, TestEntity3.class);
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .findById(objectId, TestEntity3.class);
+
+        databaseShardedMongoTemplate.findById(objectId, TestEntity3.class, "TEST3");
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .findById(objectId, TestEntity3.class, "TEST3");
+
+        databaseShardedMongoTemplate.findOne(query, TestEntity3.class);
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .findOne(query, TestEntity3.class);
+
+        databaseShardedMongoTemplate.findOne(query, TestEntity3.class, "TEST3");
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .findOne(query, TestEntity3.class, "TEST3");
     }
 
     @Test
@@ -166,6 +186,99 @@ public class DatabaseShardedMongoTemplateTest {
         Query query = new Query();
         ShardingHintManager.setCollectionHint(String.valueOf(0));
         databaseShardedMongoTemplate.find(query, TestEntity3.class);
+    }
+
+    @Test
+    public void testSave() {
+        DatabaseShardedMongoTemplate databaseShardedMongoTemplate =
+                getFixture(FixtureConfiguration.builder().registerHintResolutionCallback(true).build());
+
+        TestEntity3 testEntity3 = new TestEntity3();
+        databaseShardedMongoTemplate.save(testEntity3);
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .save(testEntity3);
+
+        databaseShardedMongoTemplate.save(testEntity3, "TEST3");
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .save(testEntity3, "TEST3");
+
+        databaseShardedMongoTemplate.insert(testEntity3);
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .insert(testEntity3);
+
+        databaseShardedMongoTemplate.insert(testEntity3, "TEST3");
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .insert(testEntity3, "TEST3");
+
+        databaseShardedMongoTemplate.insert(Collections.singletonList(testEntity3), TestEntity3.class);
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .insert(anyList(), eq(TestEntity3.class));
+
+        databaseShardedMongoTemplate.insert(Collections.singletonList(testEntity3), "TEST3");
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .insert(anyList(), eq("TEST3"));
+
+        databaseShardedMongoTemplate.insertAll(Collections.singletonList(testEntity3));
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .insertAll(anyList());
+    }
+
+    @Test
+    public void testSaveWhenShardHintManuallySet() {
+        DatabaseShardedMongoTemplate databaseShardedMongoTemplate =
+                getFixture(FixtureConfiguration.getDefault());
+
+        TestEntity3 testEntity3 = new TestEntity3();
+        ShardingHintManager.setDatabaseHint(String.valueOf(0));
+        databaseShardedMongoTemplate.save(testEntity3);
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .save(testEntity3);
+    }
+
+    @Test
+    public void testSaveWhenShardHintResolvedFromEntity() {
+        DatabaseShardedMongoTemplate databaseShardedMongoTemplate =
+                getFixture(FixtureConfiguration.getDefault());
+
+        TestEntity3 testEntity3 = new TestEntity3();
+        databaseShardedMongoTemplate.save(testEntity3);
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .save(testEntity3);
+    }
+
+    @Test(expected = UnresolvableDatabaseShardException.class)
+    public void testSaveWhenShardHintNotSet() {
+        DatabaseShardedMongoTemplate databaseShardedMongoTemplate =
+                getFixture(FixtureConfiguration.getDefault());
+
+        TestEntity1 testEntity1 = new TestEntity1();
+        databaseShardedMongoTemplate.save(testEntity1);
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .save(testEntity1);
+    }
+
+    @Test(expected = UnresolvableDatabaseShardException.class)
+    public void testSaveWhenCollectionShardHintSet() {
+        DatabaseShardedMongoTemplate databaseShardedMongoTemplate =
+                getFixture(FixtureConfiguration.getDefault());
+
+        TestEntity1 testEntity1 = new TestEntity1();
+        ShardingHintManager.setCollectionHint(String.valueOf(0));
+        databaseShardedMongoTemplate.save(testEntity1);
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .save(testEntity1);
+    }
+
+    @Test(expected = UnresolvableDatabaseShardException.class)
+    public void testSaveWhenInvalidShardHintSet() {
+        DatabaseShardedMongoTemplate databaseShardedMongoTemplate =
+                getFixture(FixtureConfiguration.getDefault());
+
+        TestEntity1 testEntity1 = new TestEntity1();
+        ShardingHintManager.setCollectionHint(String.valueOf(5));
+        databaseShardedMongoTemplate.save(testEntity1);
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .save(testEntity1);
     }
 
     @After
