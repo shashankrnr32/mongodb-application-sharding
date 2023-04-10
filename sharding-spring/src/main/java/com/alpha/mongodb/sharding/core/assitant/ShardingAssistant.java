@@ -29,7 +29,7 @@ public interface ShardingAssistant {
         if (hint.isPresent() && null != hint.get().getDatabaseHint()) {
             return hint.get().getDatabaseHint();
         } else {
-            throw new UnresolvableCollectionShardException();
+            throw new UnresolvableDatabaseShardException();
         }
     }
 

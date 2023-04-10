@@ -38,7 +38,7 @@ public class TestEntity3 implements CollectionShardedEntity, DatabaseShardedEnti
 
         @Override
         public ShardingHint resolveHintForFindContext(Document query, Class<TestEntity3> entityClass) {
-            return ShardingHint.withCollectionHint("0");
+            return ShardingHint.withDatabaseHint(String.valueOf(0));
         }
     }
 
@@ -47,7 +47,7 @@ public class TestEntity3 implements CollectionShardedEntity, DatabaseShardedEnti
 
         @Override
         public ShardingHint resolveHintForFindContext(Document query, Class<TestEntity3> entityClass) {
-            return ShardingHint.withCollectionHint("0");
+            return ShardingHint.withCollectionHint(String.valueOf(0));
         }
     }
 
@@ -56,7 +56,7 @@ public class TestEntity3 implements CollectionShardedEntity, DatabaseShardedEnti
 
         @Override
         public ShardingHint resolveHintForFindContext(Document query, Class<TestEntity3> entityClass) {
-            return ShardingHint.withCollectionHint("0");
+            return ShardingHint.withCollectionHint(String.valueOf(0));
         }
     }
 }

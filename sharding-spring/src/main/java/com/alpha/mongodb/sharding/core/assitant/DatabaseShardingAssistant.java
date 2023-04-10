@@ -10,59 +10,59 @@ import org.springframework.data.mongodb.core.query.UpdateDefinition;
 import java.util.Map;
 import java.util.Optional;
 
-public interface DatabaseShardingAssistant<MT> extends ShardingAssistant {
+public interface DatabaseShardingAssistant<M> extends ShardingAssistant {
 
-    Map<String, MT> getDelegatedShardedMongoTemplateMap();
+    Map<String, M> getDelegatedShardedMongoTemplateMap();
 
-    default <T> MT getDelegatedTemplateForFindContext(Class<T> entityClass, Query query) {
+    default <T> M getDelegatedTemplateForFindContext(Class<T> entityClass, Query query) {
         Optional<ShardingHint> shardingHint = getHintResolutionCallbacks().callbackForFindContext(entityClass, query);
         return shardingHint.map(hint -> Optional.ofNullable(getDelegatedShardedMongoTemplateMap().get(hint.getDatabaseHint()))
                 .orElseThrow(UnresolvableDatabaseShardException::new)).orElseGet(this::getDelegatedTemplateWithoutEntityContext);
     }
 
-    default <T> MT getDelegatedTemplateForFindContext(Class<T> entityClass, Document query) {
+    default <T> M getDelegatedTemplateForFindContext(Class<T> entityClass, Document query) {
         Optional<ShardingHint> shardingHint = getHintResolutionCallbacks().callbackForFindContext(entityClass, query);
         return shardingHint.map(hint -> Optional.ofNullable(getDelegatedShardedMongoTemplateMap().get(hint.getDatabaseHint()))
                 .orElseThrow(UnresolvableDatabaseShardException::new)).orElseGet(this::getDelegatedTemplateWithoutEntityContext);
     }
 
-    default <T> MT getDelegatedTemplateForDeleteContext(Class<T> entityClass, Query query) {
+    default <T> M getDelegatedTemplateForDeleteContext(Class<T> entityClass, Query query) {
         Optional<ShardingHint> shardingHint = getHintResolutionCallbacks().callbackForDeleteContext(entityClass, query);
         return shardingHint.map(hint -> Optional.ofNullable(getDelegatedShardedMongoTemplateMap().get(hint.getDatabaseHint()))
                 .orElseThrow(UnresolvableDatabaseShardException::new)).orElseGet(this::getDelegatedTemplateWithoutEntityContext);
     }
 
-    default <T> MT getDelegatedTemplateForDeleteContext(Class<T> entityClass, Document query) {
+    default <T> M getDelegatedTemplateForDeleteContext(Class<T> entityClass, Document query) {
         Optional<ShardingHint> shardingHint = getHintResolutionCallbacks().callbackForDeleteContext(entityClass, query);
         return shardingHint.map(hint -> Optional.ofNullable(getDelegatedShardedMongoTemplateMap().get(hint.getDatabaseHint()))
                 .orElseThrow(UnresolvableDatabaseShardException::new)).orElseGet(this::getDelegatedTemplateWithoutEntityContext);
     }
 
-    default <T> MT getDelegatedTemplateForDeleteContext(T entity) {
+    default <T> M getDelegatedTemplateForDeleteContext(T entity) {
         Optional<ShardingHint> shardingHint = getHintResolutionCallbacks().callbackForDeleteContext(entity);
         return shardingHint.map(hint -> Optional.ofNullable(getDelegatedShardedMongoTemplateMap().get(hint.getDatabaseHint()))
                 .orElseThrow(UnresolvableDatabaseShardException::new)).orElseGet(() -> getDelegatedTemplateWithEntityContext(entity));
     }
 
-    default <T> MT getDelegatedTemplateForUpdateContext(Class<T> entityClass, Query query, UpdateDefinition updateDefinition) {
+    default <T> M getDelegatedTemplateForUpdateContext(Class<T> entityClass, Query query, UpdateDefinition updateDefinition) {
         Optional<ShardingHint> shardingHint = getHintResolutionCallbacks().callbackForUpdateContext(entityClass, query, updateDefinition);
         return shardingHint.map(hint -> Optional.ofNullable(getDelegatedShardedMongoTemplateMap().get(hint.getDatabaseHint()))
                 .orElseThrow(UnresolvableDatabaseShardException::new)).orElseGet(this::getDelegatedTemplateWithoutEntityContext);
     }
 
-    default <T> MT getDelegatedTemplateForUpdateContext(Class<T> entityClass, Document query, UpdateDefinition updateDefinition) {
+    default <T> M getDelegatedTemplateForUpdateContext(Class<T> entityClass, Document query, UpdateDefinition updateDefinition) {
         Optional<ShardingHint> shardingHint = getHintResolutionCallbacks().callbackForUpdateContext(entityClass, query, updateDefinition);
         return shardingHint.map(hint -> Optional.ofNullable(getDelegatedShardedMongoTemplateMap().get(hint.getDatabaseHint()))
                 .orElseThrow(UnresolvableDatabaseShardException::new)).orElseGet(this::getDelegatedTemplateWithoutEntityContext);
     }
 
-    default <T> MT getDelegatedTemplateForSaveContext(T entity) {
+    default <T> M getDelegatedTemplateForSaveContext(T entity) {
         Optional<ShardingHint> shardingHint = getHintResolutionCallbacks().callbackForSaveContext((Class<T>) entity.getClass(), entity);
         return shardingHint.map(hint -> Optional.ofNullable(getDelegatedShardedMongoTemplateMap().get(hint.getDatabaseHint()))
                 .orElseThrow(UnresolvableDatabaseShardException::new)).orElseGet(() -> getDelegatedTemplateWithEntityContext(entity));
     }
 
-    default MT getDelegatedTemplateWithoutEntityContext() {
+    default M getDelegatedTemplateWithoutEntityContext() {
         if (getDelegatedShardedMongoTemplateMap().containsKey(resolveDatabaseHintWithoutEntityContext())) {
             return getDelegatedShardedMongoTemplateMap().get(resolveDatabaseHintWithoutEntityContext());
         } else {
@@ -70,7 +70,7 @@ public interface DatabaseShardingAssistant<MT> extends ShardingAssistant {
         }
     }
 
-    default <T> MT getDelegatedTemplateWithEntityContext(T entity) {
+    default <T> M getDelegatedTemplateWithEntityContext(T entity) {
         if (entity instanceof DatabaseShardedEntity) {
             return getDelegatedShardedMongoTemplateMap().get(((DatabaseShardedEntity) entity).resolveDatabaseHint());
         } else {
