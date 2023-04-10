@@ -32,6 +32,9 @@ as a dependency to your project.
 </dependency>
 ```
 
+To see a sample usage of different Sharding Strategies, visit the documentation
+[here](https://shashankrnr32.gitbook.io/mongodb-application-sharding).
+
 ## Features
 
 1. Supports 3 different sharding strategies for Spring / Spring Boot projects by extending MongoTemplate.
@@ -40,6 +43,20 @@ as a dependency to your project.
 4. Automatic Hint Resolution Callback discovery for Spring Beans using ApplicationContext
 5. Custom configuration available for Sharding, validation of shards etc.
 6. Tested using Spring's Mongo Template and Repository
+
+## Roadmap
+
+This project is in its budding stage. But I do see a lot of features that can be added.
+
+1. Sharding support for Mongo Client (without the need of spring dependencies). This would support both executable and
+   reactive Mongo Clients.
+2. More customization to Sharding options to allow dynamic shards, custom validations etc.
+3. Support non-sharded collections within a sharded database.
+4. Support to query from all the shards when the library is unable to route the query to a particular shard.
+5. Configuring Sharding from property files without writing any Java Code
+6. Support Aggregation queries
+7. Custom ID generator for the sharded entities.
+8. And so much more...!
 
 ## Code Analysis
 
