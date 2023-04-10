@@ -35,6 +35,8 @@ import java.util.List;
  */
 public class CollectionShardedMongoTemplate extends ShardedMongoTemplate implements CollectionShardingAssistant {
 
+    private static final String ID_KEY = "_id";
+
     public CollectionShardedMongoTemplate(MongoClient mongoClient, String databaseName, CollectionShardingOptions shardingOptions) {
         super(mongoClient, databaseName, shardingOptions);
     }
@@ -88,20 +90,21 @@ public class CollectionShardedMongoTemplate extends ShardedMongoTemplate impleme
     protected <T> List<T> doFindAndDelete(String collectionName, Query query, Class<T> entityClass) {
         List<T> result = find(query, entityClass, collectionName);
 
-        MongoPersistentEntity<T> persistentEntity =
-                (MongoPersistentEntity<T>) this.getConverter().getMappingContext().getPersistentEntity(entityClass);
-
-        MultiValueMap<String, Object> byIds = new LinkedMultiValueMap<>();
-        result.stream().forEach(resultEntry -> {
-            byIds.add("_id", persistentEntity.getPropertyAccessor(resultEntry).getProperty(
-                    persistentEntity.getIdProperty()));
-        });
-
-        Criteria[] criterias = byIds.entrySet().stream() //
-                .map(it -> Criteria.where(it.getKey()).in(it.getValue())) //
-                .toArray(Criteria[]::new);
-
         if (!org.springframework.util.CollectionUtils.isEmpty(result)) {
+            MongoPersistentEntity<T> persistentEntity =
+                    (MongoPersistentEntity<T>) this.getConverter().getMappingContext().getPersistentEntity(entityClass);
+
+            MultiValueMap<String, Object> byIds = new LinkedMultiValueMap<>();
+            result.forEach(resultEntry -> {
+                assert persistentEntity != null;
+                byIds.add(ID_KEY, persistentEntity.getPropertyAccessor(resultEntry).getProperty(
+                        persistentEntity.getIdProperty()));
+            });
+
+            Criteria[] criterias = byIds.entrySet().stream() //
+                    .map(it -> Criteria.where(it.getKey()).in(it.getValue())) //
+                    .toArray(Criteria[]::new);
+
             remove(new Query(criterias.length == 1 ? criterias[0] : new Criteria().orOperator(criterias)),
                     entityClass, collectionName);
         }
