@@ -412,25 +412,4 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate implement
     public <T> List<T> findDistinct(Query query, String field, String collectionName, Class<?> entityClass, Class<T> resultClass) {
         return getDelegatedTemplateForFindContext(entityClass, query).findDistinct(query, field, collectionName, entityClass, resultClass);
     }
-
-    @Override
-    public long countFromAll(Query query, Class<?> entityClass) {
-        return this.delegatedShardedMongoTemplateMap.values().stream().mapToLong(mongoTemplate -> mongoTemplate.count(query, entityClass)).sum();
-    }
-
-    @Override
-    public long countFromAll(Query query, String collectionName) {
-        return this.delegatedShardedMongoTemplateMap.values().stream().mapToLong(mongoTemplate -> mongoTemplate.count(query, collectionName)).sum();
-    }
-
-    @Override
-    public long countFromAll(Query query, Class<?> entityClass, String collectionName) {
-        return this.delegatedShardedMongoTemplateMap.values().stream().mapToLong(mongoTemplate -> mongoTemplate.count(query, entityClass, collectionName)).sum();
-    }
-
-    @Override
-    public long estimatedCountFromAllShards(String collectionName) {
-        return 0;
-    }
-
 }

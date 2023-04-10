@@ -579,6 +579,41 @@ public class CollectionShardedMongoTemplateTest {
         assertEquals(objectId.toString(), queryResult.get(0).getId());
     }
 
+    @Test
+    public void testInsertBatch() {
+        MongoTemplate mongoTemplate = getFixture(FixtureConfiguration.getDefault());
+
+        MongoDatabase mockMongoDatabase = mock(MongoDatabase.class);
+        mongoDatabaseUtilsMockedStatic.when(() -> MongoDatabaseUtils.getDatabase(eq(mongoTemplate.getMongoDatabaseFactory()), any()))
+                .thenReturn(mockMongoDatabase);
+
+        MongoCollection<Document> mockCollection = mock(MongoCollection.class);
+        when(mockMongoDatabase.getCollection("TEST3_0", Document.class))
+                .thenReturn(mockCollection);
+
+        TestEntity3 testEntity3 = spy(new TestEntity3());
+        List<TestEntity3> persistedEntityList = (List<TestEntity3>) mongoTemplate.insert(Collections.singletonList(testEntity3), TestEntity3.class);
+
+        verify(testEntity3, times(1)).resolveCollectionHint();
+        verify(mockCollection).insertMany(any());
+    }
+
+    @Test
+    public void testCount() {
+        MongoTemplate mongoTemplate = getFixture(FixtureConfiguration.getDefault());
+
+        MongoDatabase mockMongoDatabase = mock(MongoDatabase.class);
+        mongoDatabaseUtilsMockedStatic.when(() -> MongoDatabaseUtils.getDatabase(eq(mongoTemplate.getMongoDatabaseFactory()), any()))
+                .thenReturn(mockMongoDatabase);
+
+        MongoCollection<Document> mockCollection = mock(MongoCollection.class);
+        when(mockMongoDatabase.getCollection("TEST3_0", Document.class))
+                .thenReturn(mockCollection);
+
+        ShardingHintManager.setCollectionHint(String.valueOf(0));
+        assertEquals(0, mongoTemplate.count(new Query(), TestEntity3.class));
+        assertEquals(0, mongoTemplate.estimatedCount(TestEntity3.class));
+    }
 
     @After
     public void teardown() {
