@@ -146,8 +146,16 @@ public class DatabaseShardedMongoTemplateTest {
 
         Query query = new Query();
         databaseShardedMongoTemplate.find(query, TestEntity3.class);
-        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
-                .find(query, TestEntity3.class);
+    }
+
+    @Test(expected = UnresolvableDatabaseShardException.class)
+    public void testFindWhenInvalidShardHint() {
+        DatabaseShardedMongoTemplate databaseShardedMongoTemplate =
+                getFixture(FixtureConfiguration.getDefault());
+
+        Query query = new Query();
+        ShardingHintManager.setDatabaseHint(String.valueOf(5));
+        databaseShardedMongoTemplate.find(query, TestEntity3.class);
     }
 
     @Test(expected = UnresolvableDatabaseShardException.class)
@@ -158,8 +166,6 @@ public class DatabaseShardedMongoTemplateTest {
         Query query = new Query();
         ShardingHintManager.setCollectionHint(String.valueOf(0));
         databaseShardedMongoTemplate.find(query, TestEntity3.class);
-        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
-                .find(query, TestEntity3.class);
     }
 
     @After
