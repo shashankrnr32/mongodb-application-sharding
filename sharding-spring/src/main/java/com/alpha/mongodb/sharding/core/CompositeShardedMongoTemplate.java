@@ -4,7 +4,6 @@ import com.alpha.mongodb.sharding.core.configuration.CompositeShardingOptions;
 import com.mongodb.client.MongoClient;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
-import org.springframework.data.mongodb.core.query.Query;
 
 import java.util.Map;
 
@@ -26,20 +25,5 @@ public class CompositeShardedMongoTemplate extends DatabaseShardedMongoTemplate 
 
     public CompositeShardedMongoTemplate(Map<String, MongoDatabaseFactory> delegatedDatabaseFactory, MongoConverter mongoConverter, CompositeShardingOptions shardingOptions) {
         super(delegatedDatabaseFactory, mongoConverter, shardingOptions);
-    }
-
-    @Override
-    public long countFromAll(Query query, Class<?> entityClass) {
-        return this.getDelegatedShardedMongoTemplateMap().values().stream().mapToLong(mongoTemplate -> ((CollectionShardedMongoTemplate) mongoTemplate).countFromAll(query, entityClass)).sum();
-    }
-
-    @Override
-    public long countFromAll(Query query, String collectionName) {
-        return this.getDelegatedShardedMongoTemplateMap().values().stream().mapToLong(mongoTemplate -> ((CollectionShardedMongoTemplate) mongoTemplate).countFromAll(query, collectionName)).sum();
-    }
-
-    @Override
-    public long countFromAll(Query query, Class<?> entityClass, String collectionName) {
-        return this.getDelegatedShardedMongoTemplateMap().values().stream().mapToLong(mongoTemplate -> ((CollectionShardedMongoTemplate) mongoTemplate).countFromAll(query, entityClass, collectionName)).sum();
     }
 }

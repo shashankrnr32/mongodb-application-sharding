@@ -20,7 +20,6 @@ import org.springframework.data.mongodb.core.query.Collation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.UpdateDefinition;
-import org.springframework.lang.Nullable;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
@@ -96,7 +95,6 @@ public class CollectionShardedMongoTemplate extends ShardedMongoTemplate impleme
 
             MultiValueMap<String, Object> byIds = new LinkedMultiValueMap<>();
             result.forEach(resultEntry -> {
-                assert persistentEntity != null;
                 byIds.add(ID_KEY, persistentEntity.getPropertyAccessor(resultEntry).getProperty(
                         persistentEntity.getIdProperty()));
             });
@@ -115,23 +113,6 @@ public class CollectionShardedMongoTemplate extends ShardedMongoTemplate impleme
     @Override
     protected UpdateResult doUpdate(String collectionName, Query query, UpdateDefinition update, Class<?> entityClass, boolean upsert, boolean multi) {
         return super.doUpdate(resolveCollectionNameForUpdateContext(collectionName, entityClass, query, update), query, update, entityClass, upsert, multi);
-    }
-
-    public long countFromAll(Query query, Class<?> entityClass) {
-        return ((CollectionShardingOptions) this.getShardingOptions()).getDefaultCollectionHintsSet().stream().mapToLong(shardHint -> count(query, entityClass)).sum();
-    }
-
-    public long countFromAll(Query query, String collectionName) {
-        return ((CollectionShardingOptions) this.getShardingOptions()).getDefaultCollectionHintsSet().stream().mapToLong(shardHint -> count(query, collectionName)).sum();
-    }
-
-    public long countFromAll(Query query, @Nullable Class<?> entityClass, String collectionName) {
-        return ((CollectionShardingOptions) this.getShardingOptions()).getDefaultCollectionHintsSet().stream().mapToLong(shardHint -> count(query, entityClass, collectionName)).sum();
-    }
-
-    @Override
-    public long estimatedCountFromAllShards(String collectionName) {
-        return ((CollectionShardingOptions) this.getShardingOptions()).getDefaultCollectionHintsSet().stream().mapToLong(shardHint -> estimatedCount(collectionName)).sum();
     }
 
     @Override
