@@ -8,14 +8,18 @@ import com.alpha.mongodb.sharding.core.hint.ShardingHintManager;
 import com.mongodb.client.MongoClient;
 import lombok.Builder;
 import lombok.Data;
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.junit.After;
 import org.junit.Test;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
+import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.MongoExceptionTranslator;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
+import org.springframework.data.mongodb.core.query.BasicUpdate;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.UpdateDefinition;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -228,11 +232,11 @@ public class DatabaseShardedMongoTemplateTest {
         DatabaseShardedMongoTemplate databaseShardedMongoTemplate =
                 getFixture(FixtureConfiguration.getDefault());
 
-        TestEntity3 testEntity3 = new TestEntity3();
+        TestEntity1 testEntity1 = new TestEntity1();
         ShardingHintManager.setDatabaseHint(String.valueOf(0));
-        databaseShardedMongoTemplate.save(testEntity3);
+        databaseShardedMongoTemplate.save(testEntity1);
         verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
-                .save(testEntity3);
+                .save(testEntity1);
     }
 
     @Test
@@ -280,6 +284,209 @@ public class DatabaseShardedMongoTemplateTest {
         verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
                 .save(testEntity1);
     }
+
+    @Test
+    public void testDelete() {
+        DatabaseShardedMongoTemplate databaseShardedMongoTemplate =
+                getFixture(FixtureConfiguration.builder().registerHintResolutionCallback(true).build());
+
+        TestEntity3 testEntity3 = new TestEntity3();
+        databaseShardedMongoTemplate.remove(testEntity3);
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .remove(testEntity3);
+
+        Query query = new Query();
+        databaseShardedMongoTemplate.remove(query, TestEntity3.class);
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .remove(query, TestEntity3.class);
+
+        ShardingHintManager.setDatabaseHint(String.valueOf(0));
+        databaseShardedMongoTemplate.remove(query, "TEST3");
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .remove(query, "TEST3");
+
+        databaseShardedMongoTemplate.remove(query, TestEntity3.class, "TEST3");
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .remove(query, TestEntity3.class, "TEST3");
+
+        databaseShardedMongoTemplate.remove(testEntity3, "TEST3");
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .remove(testEntity3, "TEST3");
+
+        databaseShardedMongoTemplate.findAllAndRemove(query, TestEntity3.class);
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .findAllAndRemove(query, TestEntity3.class);
+
+        databaseShardedMongoTemplate.findAllAndRemove(query, "TEST3");
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .findAllAndRemove(query, "TEST3");
+
+        databaseShardedMongoTemplate.findAllAndRemove(query, TestEntity3.class, "TEST3");
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .findAllAndRemove(query, TestEntity3.class, "TEST3");
+    }
+
+    @Test
+    public void testDeleteWhenShardHintResolvedFromEntity() {
+        DatabaseShardedMongoTemplate databaseShardedMongoTemplate =
+                getFixture(FixtureConfiguration.getDefault());
+
+        TestEntity3 testEntity3 = new TestEntity3();
+        databaseShardedMongoTemplate.remove(testEntity3);
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .remove(testEntity3);
+    }
+
+    @Test
+    public void testDeleteWhenShardHintManuallySet() {
+        DatabaseShardedMongoTemplate databaseShardedMongoTemplate =
+                getFixture(FixtureConfiguration.getDefault());
+
+        TestEntity1 testEntity1 = new TestEntity1();
+        ShardingHintManager.setDatabaseHint(String.valueOf(0));
+        databaseShardedMongoTemplate.remove(testEntity1);
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .remove(testEntity1);
+    }
+
+    @Test(expected = UnresolvableDatabaseShardException.class)
+    public void testDeleteWhenShardHintNotSet() {
+        DatabaseShardedMongoTemplate databaseShardedMongoTemplate =
+                getFixture(FixtureConfiguration.getDefault());
+
+        TestEntity1 testEntity1 = new TestEntity1();
+        databaseShardedMongoTemplate.remove(testEntity1);
+    }
+
+    @Test(expected = UnresolvableDatabaseShardException.class)
+    public void testDeleteWhenCollectionShardHintSet() {
+        DatabaseShardedMongoTemplate databaseShardedMongoTemplate =
+                getFixture(FixtureConfiguration.getDefault());
+
+        TestEntity1 testEntity1 = new TestEntity1();
+        ShardingHintManager.setCollectionHint(String.valueOf(0));
+        databaseShardedMongoTemplate.remove(testEntity1);
+    }
+
+    @Test(expected = UnresolvableDatabaseShardException.class)
+    public void testDeleteWhenInvalidShardHintSet() {
+        DatabaseShardedMongoTemplate databaseShardedMongoTemplate =
+                getFixture(FixtureConfiguration.getDefault());
+
+        TestEntity1 testEntity1 = new TestEntity1();
+        ShardingHintManager.setDatabaseHint(String.valueOf(5));
+        databaseShardedMongoTemplate.remove(testEntity1);
+    }
+
+    @Test
+    public void testUpdate() {
+        DatabaseShardedMongoTemplate databaseShardedMongoTemplate =
+                getFixture(FixtureConfiguration.builder().registerHintResolutionCallback(true).build());
+        ShardingHintManager.setDatabaseHint(String.valueOf(0));
+
+        Query query = new Query();
+        UpdateDefinition basicUpdate = new BasicUpdate(new Document());
+        databaseShardedMongoTemplate.updateFirst(query, basicUpdate, TestEntity3.class);
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .updateFirst(query, basicUpdate, TestEntity3.class);
+
+        databaseShardedMongoTemplate.updateFirst(query, basicUpdate, "TEST3");
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .updateFirst(query, basicUpdate, "TEST3");
+
+        databaseShardedMongoTemplate.updateFirst(query, basicUpdate, TestEntity3.class, "TEST3");
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .updateFirst(query, basicUpdate, TestEntity3.class, "TEST3");
+
+        databaseShardedMongoTemplate.upsert(query, basicUpdate, TestEntity3.class);
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .upsert(query, basicUpdate, TestEntity3.class);
+
+        databaseShardedMongoTemplate.upsert(query, basicUpdate, "TEST3");
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .upsert(query, basicUpdate, "TEST3");
+
+        databaseShardedMongoTemplate.upsert(query, basicUpdate, TestEntity3.class, "TEST3");
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .upsert(query, basicUpdate, TestEntity3.class, "TEST3");
+
+        databaseShardedMongoTemplate.updateMulti(query, basicUpdate, TestEntity3.class);
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .updateMulti(query, basicUpdate, TestEntity3.class);
+
+        databaseShardedMongoTemplate.updateMulti(query, basicUpdate, "TEST3");
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .updateMulti(query, basicUpdate, "TEST3");
+
+        databaseShardedMongoTemplate.updateMulti(query, basicUpdate, TestEntity3.class, "TEST3");
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .updateMulti(query, basicUpdate, TestEntity3.class, "TEST3");
+
+        databaseShardedMongoTemplate.findAndModify(query, basicUpdate, TestEntity3.class);
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .findAndModify(query, basicUpdate, TestEntity3.class);
+
+        databaseShardedMongoTemplate.findAndModify(query, basicUpdate, TestEntity3.class, "TEST3");
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .findAndModify(query, basicUpdate, TestEntity3.class, "TEST3");
+
+        FindAndModifyOptions findAndModifyOptions = new FindAndModifyOptions();
+        databaseShardedMongoTemplate.findAndModify(query, basicUpdate, findAndModifyOptions, TestEntity3.class);
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .findAndModify(query, basicUpdate, findAndModifyOptions, TestEntity3.class);
+
+        databaseShardedMongoTemplate.findAndModify(query, basicUpdate, findAndModifyOptions, TestEntity3.class, "TEST3");
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .findAndModify(query, basicUpdate, findAndModifyOptions, TestEntity3.class, "TEST3");
+    }
+
+    @Test
+    public void testUpdateWhenShardHintManuallySet() {
+        DatabaseShardedMongoTemplate databaseShardedMongoTemplate =
+                getFixture(FixtureConfiguration.getDefault());
+
+        Query query = new Query();
+        UpdateDefinition basicUpdate = new BasicUpdate(new Document());
+        ShardingHintManager.setDatabaseHint(String.valueOf(0));
+        databaseShardedMongoTemplate.updateFirst(query, basicUpdate, TestEntity3.class);
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .updateFirst(query, basicUpdate, TestEntity3.class);
+    }
+
+    @Test(expected = UnresolvableDatabaseShardException.class)
+    public void testUpdateWhenShardHintNotSet() {
+        DatabaseShardedMongoTemplate databaseShardedMongoTemplate =
+                getFixture(FixtureConfiguration.getDefault());
+
+        Query query = new Query();
+        UpdateDefinition basicUpdate = new BasicUpdate(new Document());
+        databaseShardedMongoTemplate.updateFirst(query, basicUpdate, TestEntity3.class);
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .updateFirst(query, basicUpdate, TestEntity3.class);
+    }
+
+    @Test(expected = UnresolvableDatabaseShardException.class)
+    public void testUpdateWhenCollectionShardHintSet() {
+        DatabaseShardedMongoTemplate databaseShardedMongoTemplate =
+                getFixture(FixtureConfiguration.getDefault());
+
+        Query query = new Query();
+        UpdateDefinition basicUpdate = new BasicUpdate(new Document());
+        ShardingHintManager.setCollectionHint(String.valueOf(0));
+        databaseShardedMongoTemplate.updateFirst(query, basicUpdate, TestEntity3.class);
+    }
+
+    @Test(expected = UnresolvableDatabaseShardException.class)
+    public void testUpdateWhenInvalidShardHintSet() {
+        DatabaseShardedMongoTemplate databaseShardedMongoTemplate =
+                getFixture(FixtureConfiguration.getDefault());
+
+        Query query = new Query();
+        UpdateDefinition basicUpdate = new BasicUpdate(new Document());
+        ShardingHintManager.setDatabaseHint(String.valueOf(5));
+        databaseShardedMongoTemplate.updateFirst(query, basicUpdate, TestEntity3.class);
+    }
+
 
     @After
     public void teardown() {
