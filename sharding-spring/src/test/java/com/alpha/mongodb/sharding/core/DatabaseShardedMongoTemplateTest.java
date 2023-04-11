@@ -14,6 +14,7 @@ import org.junit.After;
 import org.junit.Test;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
+import org.springframework.data.mongodb.core.FindAndReplaceOptions;
 import org.springframework.data.mongodb.core.MongoExceptionTranslator;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
@@ -324,6 +325,14 @@ public class DatabaseShardedMongoTemplateTest {
         databaseShardedMongoTemplate.findAllAndRemove(query, TestEntity3.class, "TEST3");
         verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
                 .findAllAndRemove(query, TestEntity3.class, "TEST3");
+
+        databaseShardedMongoTemplate.findAndRemove(query, TestEntity3.class);
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .findAndRemove(query, TestEntity3.class);
+
+        databaseShardedMongoTemplate.findAndRemove(query, TestEntity3.class, "TEST3");
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .findAndRemove(query, TestEntity3.class, "TEST3");
     }
 
     @Test
@@ -438,6 +447,37 @@ public class DatabaseShardedMongoTemplateTest {
         databaseShardedMongoTemplate.findAndModify(query, basicUpdate, findAndModifyOptions, TestEntity3.class, "TEST3");
         verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
                 .findAndModify(query, basicUpdate, findAndModifyOptions, TestEntity3.class, "TEST3");
+
+        TestEntity3 testEntity3 = new TestEntity3();
+        databaseShardedMongoTemplate.findAndReplace(query, testEntity3);
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .findAndReplace(query, testEntity3);
+
+        databaseShardedMongoTemplate.findAndReplace(query, testEntity3, "TEST3");
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .findAndReplace(query, testEntity3, "TEST3");
+
+        FindAndReplaceOptions findAndReplaceOptions = new FindAndReplaceOptions();
+        databaseShardedMongoTemplate.findAndReplace(query, testEntity3, findAndReplaceOptions);
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .findAndReplace(query, testEntity3, findAndReplaceOptions);
+
+        databaseShardedMongoTemplate.findAndReplace(query, testEntity3, findAndReplaceOptions, "TEST3");
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .findAndReplace(query, testEntity3, findAndReplaceOptions, "TEST3");
+
+        databaseShardedMongoTemplate.findAndReplace(query, testEntity3, findAndReplaceOptions, TestEntity3.class, TestEntity3.class);
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .findAndReplace(query, testEntity3, findAndReplaceOptions, TestEntity3.class, TestEntity3.class);
+
+        databaseShardedMongoTemplate.findAndReplace(query, testEntity3, findAndReplaceOptions, TestEntity3.class, "TEST3");
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .findAndReplace(query, testEntity3, findAndReplaceOptions, TestEntity3.class, "TEST3");
+
+        databaseShardedMongoTemplate.findAndReplace(query, testEntity3, findAndReplaceOptions, TestEntity3.class, "TEST3", TestEntity3.class);
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .findAndReplace(query, testEntity3, findAndReplaceOptions, TestEntity3.class, "TEST3", TestEntity3.class);
+
     }
 
     @Test
