@@ -13,6 +13,7 @@ import org.bson.types.ObjectId;
 import org.junit.After;
 import org.junit.Test;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
+import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.MongoExceptionTranslator;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
@@ -382,7 +383,7 @@ public class DatabaseShardedMongoTemplateTest {
         DatabaseShardedMongoTemplate databaseShardedMongoTemplate =
                 getFixture(FixtureConfiguration.builder().registerHintResolutionCallback(true).build());
         ShardingHintManager.setDatabaseHint(String.valueOf(0));
-        
+
         Query query = new Query();
         UpdateDefinition basicUpdate = new BasicUpdate(new Document());
         databaseShardedMongoTemplate.updateFirst(query, basicUpdate, TestEntity3.class);
@@ -420,6 +421,23 @@ public class DatabaseShardedMongoTemplateTest {
         databaseShardedMongoTemplate.updateMulti(query, basicUpdate, TestEntity3.class, "TEST3");
         verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
                 .updateMulti(query, basicUpdate, TestEntity3.class, "TEST3");
+
+        databaseShardedMongoTemplate.findAndModify(query, basicUpdate, TestEntity3.class);
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .findAndModify(query, basicUpdate, TestEntity3.class);
+
+        databaseShardedMongoTemplate.findAndModify(query, basicUpdate, TestEntity3.class, "TEST3");
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .findAndModify(query, basicUpdate, TestEntity3.class, "TEST3");
+
+        FindAndModifyOptions findAndModifyOptions = new FindAndModifyOptions();
+        databaseShardedMongoTemplate.findAndModify(query, basicUpdate, findAndModifyOptions, TestEntity3.class);
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .findAndModify(query, basicUpdate, findAndModifyOptions, TestEntity3.class);
+
+        databaseShardedMongoTemplate.findAndModify(query, basicUpdate, findAndModifyOptions, TestEntity3.class, "TEST3");
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .findAndModify(query, basicUpdate, findAndModifyOptions, TestEntity3.class, "TEST3");
     }
 
     @Test
