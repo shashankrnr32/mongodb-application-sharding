@@ -1,7 +1,7 @@
 package com.alpha.mongodb.sharding.example.configuration;
 
-import com.alpha.mongodb.sharding.core.DatabaseShardedReactiveMongoTemplate;
 import com.alpha.mongodb.sharding.core.configuration.DatabaseShardingOptions;
+import com.alpha.mongodb.sharding.core.template.DatabaseShardedReactiveMongoTemplate;
 import com.mongodb.ConnectionString;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

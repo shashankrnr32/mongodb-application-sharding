@@ -34,7 +34,9 @@
         <apache.commons.lang3.version>3.12.0</apache.commons.lang3.version>
         <apache.commons.collection.version>3.2.2</apache.commons.collection.version>
         <spring.data.mongodb.version>3.3.10</spring.data.mongodb.version>
-        <mongodb.driver.version>4.4.2</mongodb.driver.version>
+        <mongodb.driver.executable.version>4.4.2</mongodb.driver.executable.version>
+        <reactor.core.version>3.5.4</reactor.core.version>
+        <mongodb.driver.reactive.version>4.9.0</mongodb.driver.reactive.version>
         <mockito.inline.version>3.12.4</mockito.inline.version>
 
     </properties>
@@ -49,6 +51,7 @@
                 <module>sharding-core</module>
                 <module>sharding-spring</module>
                 <module>sharding-example</module>
+                <module>sharding-driver</module>
             </modules>
         </profile>
     </profiles>

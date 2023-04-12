@@ -1,4 +1,4 @@
-package com.alpha.mongodb.sharding.core;
+package com.alpha.mongodb.sharding.core.template;
 
 import com.alpha.mongodb.sharding.core.configuration.CompositeShardingOptions;
 import com.mongodb.client.MongoClient;

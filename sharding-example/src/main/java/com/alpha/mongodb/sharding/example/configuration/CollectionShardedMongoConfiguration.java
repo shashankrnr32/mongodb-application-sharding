@@ -1,7 +1,7 @@
 package com.alpha.mongodb.sharding.example.configuration;
 
-import com.alpha.mongodb.sharding.core.CollectionShardedMongoTemplate;
 import com.alpha.mongodb.sharding.core.configuration.CollectionShardingOptions;
+import com.alpha.mongodb.sharding.core.template.CollectionShardedMongoTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
