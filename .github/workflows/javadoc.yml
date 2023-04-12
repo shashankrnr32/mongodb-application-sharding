@@ -16,5 +16,4 @@ jobs:
           javadoc-branch: gh-pages
           java-version: 11
           project: maven
-          custom-command: >
-            echo "sharding-core sharding-spring sharding-driver" | xargs -d " " -I % mvn -pl % -am javadoc:aggregate
+          custom-command: mvn site
