@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - package_restructure
 
 jobs:
   publish:
