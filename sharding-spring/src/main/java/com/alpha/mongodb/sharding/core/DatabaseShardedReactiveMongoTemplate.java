@@ -1,4 +1,4 @@
-package com.alpha.mongodb.sharding.core.template;
+package com.alpha.mongodb.sharding.core;
 
 import com.alpha.mongodb.sharding.core.assitant.DatabaseShardingAssistant;
 import com.alpha.mongodb.sharding.core.configuration.CompositeShardingOptions;

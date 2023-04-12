@@ -1,4 +1,4 @@
-package com.alpha.mongodb.sharding.core.template;
+package com.alpha.mongodb.sharding.core;
 
 import com.alpha.mongodb.sharding.core.assitant.ShardingAssistant;
 import com.alpha.mongodb.sharding.core.callback.HintResolutionCallback;

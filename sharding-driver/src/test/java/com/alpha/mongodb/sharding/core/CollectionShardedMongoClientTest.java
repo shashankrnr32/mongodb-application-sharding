@@ -1,15 +1,11 @@
-package com.alpha.mongodb.sharding.core.client;
+package com.alpha.mongodb.sharding.core;
 
-import com.alpha.mongodb.sharding.core.configuration.DatabaseShardingOptions;
-import com.alpha.mongodb.sharding.core.exception.UnresolvableDatabaseShardException;
+import com.alpha.mongodb.sharding.core.configuration.CollectionShardingOptions;
 import com.alpha.mongodb.sharding.core.fixture.TestEntity1;
-import com.alpha.mongodb.sharding.core.hint.ShardingHintManager;
 import com.mongodb.ClientSessionOptions;
 import com.mongodb.client.ClientSession;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -17,6 +13,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import java.util.ArrayList;
 import java.util.stream.IntStream;
 
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -24,34 +21,23 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DatabaseShardedMongoClientTest {
+public class CollectionShardedMongoClientTest {
 
-    DatabaseShardingOptions databaseShardingOptions =
-            DatabaseShardingOptions.withIntegerStreamHints(IntStream.range(0, 3));
+    CollectionShardingOptions collectionShardingOptions =
+            CollectionShardingOptions.withIntegerStreamHints(IntStream.range(0, 3));
 
     MongoClient mockMongoClient = mock(MongoClient.class);
 
     ClientSessionOptions mockClientSessionOptions = mock(ClientSessionOptions.class);
     ClientSession mockClientSession = mock(ClientSession.class);
 
-    @Before
-    public void setup() {
-        ShardingHintManager.setDatabaseHint(String.valueOf(0));
-    }
-
     @Test
     public void testGetDatabase() {
         MongoDatabase mockMongoDatabase = mock(MongoDatabase.class);
-        when(mockMongoClient.getDatabase("TEST_0")).thenReturn(mockMongoDatabase);
+        when(mockMongoClient.getDatabase("TEST")).thenReturn(mockMongoDatabase);
         MongoDatabase database = getFixture().getDatabase("TEST");
-        verify(mockMongoClient).getDatabase("TEST_0");
-    }
-
-    @Test(expected = UnresolvableDatabaseShardException.class)
-    public void testGetDatabaseWhenShardHintNotSet() {
-        ShardingHintManager.clear();
-        MongoDatabase database = getFixture().getDatabase("TEST");
-        verify(mockMongoClient).getDatabase("TEST_0");
+        verify(mockMongoClient).getDatabase("TEST");
+        assertTrue(database instanceof CollectionShardedMongoDatabase);
     }
 
     @Test
@@ -163,12 +149,7 @@ public class DatabaseShardedMongoClientTest {
         verify(mockMongoClient).getClusterDescription();
     }
 
-    @After
-    public void teardown() {
-        ShardingHintManager.clear();
-    }
-
     public MongoClient getFixture() {
-        return new DatabaseShardedMongoClient(mockMongoClient, databaseShardingOptions);
+        return new CollectionShardedMongoClient(mockMongoClient, collectionShardingOptions);
     }
 }

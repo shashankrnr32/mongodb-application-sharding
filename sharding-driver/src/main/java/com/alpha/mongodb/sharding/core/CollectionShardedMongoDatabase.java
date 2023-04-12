@@ -1,4 +1,4 @@
-package com.alpha.mongodb.sharding.core.database;
+package com.alpha.mongodb.sharding.core;
 
 import com.alpha.mongodb.sharding.core.configuration.CollectionShardingOptions;
 import com.alpha.mongodb.sharding.core.exception.UnresolvableCollectionShardException;

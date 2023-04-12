@@ -1,7 +1,6 @@
-package com.alpha.mongodb.sharding.core.client;
+package com.alpha.mongodb.sharding.core;
 
 import com.alpha.mongodb.sharding.core.configuration.CollectionShardingOptions;
-import com.alpha.mongodb.sharding.core.database.CollectionShardedMongoDatabase;
 import com.mongodb.ClientSessionOptions;
 import com.mongodb.client.ChangeStreamIterable;
 import com.mongodb.client.ClientSession;
