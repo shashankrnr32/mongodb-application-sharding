@@ -2,7 +2,6 @@ package com.alpha.mongodb.sharding.core.database;
 
 import com.alpha.mongodb.sharding.core.configuration.CollectionShardingOptions;
 import com.alpha.mongodb.sharding.core.exception.UnresolvableCollectionShardException;
-import com.alpha.mongodb.sharding.core.hint.ShardingHint;
 import com.alpha.mongodb.sharding.core.hint.ShardingHintManager;
 import com.mongodb.ReadConcern;
 import com.mongodb.ReadPreference;
@@ -279,7 +278,9 @@ public class CollectionShardedMongoDatabase implements MongoDatabase {
     }
 
     private String resolveCollectionName(String s) throws UnresolvableCollectionShardException {
-        return shardingOptions.resolveCollectionName(s, ShardingHintManager.getHint().map(ShardingHint::getCollectionHint)
-                .orElseThrow(UnresolvableCollectionShardException::new));
+        return shardingOptions.resolveCollectionName(s, ShardingHintManager.getHint().map(shardingHint -> {
+            shardingOptions.validateCollectionHint(s, shardingHint.getCollectionHint());
+            return shardingHint.getCollectionHint();
+        }).orElseThrow(UnresolvableCollectionShardException::new));
     }
 }

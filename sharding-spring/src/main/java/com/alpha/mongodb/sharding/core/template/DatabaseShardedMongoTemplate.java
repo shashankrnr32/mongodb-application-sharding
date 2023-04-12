@@ -1,4 +1,4 @@
-package com.alpha.mongodb.sharding.core;
+package com.alpha.mongodb.sharding.core.template;
 
 import com.alpha.mongodb.sharding.core.assitant.DatabaseShardingAssistant;
 import com.alpha.mongodb.sharding.core.configuration.CompositeShardingOptions;
@@ -39,18 +39,18 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate implement
     @Getter
     private final Map<String, MongoTemplate> delegatedShardedMongoTemplateMap = new HashMap<>();
 
-    public DatabaseShardedMongoTemplate(Map<String, MongoClient> delegatedMongoClient, String databaseName, DatabaseShardingOptions shardingOptions) {
-        super(delegatedMongoClient.get(shardingOptions.getDefaultDatabaseHint()),
+    public DatabaseShardedMongoTemplate(Map<String, MongoClient> delegatedMongoClientMap, String databaseName, DatabaseShardingOptions shardingOptions) {
+        super(delegatedMongoClientMap.get(shardingOptions.getDefaultDatabaseHint()),
                 shardingOptions.resolveDatabaseName(databaseName, shardingOptions.getDefaultDatabaseHint()), shardingOptions);
         shardingOptions.getDefaultDatabaseHintsSet().forEach(shardHint -> {
             if (shardingOptions instanceof CompositeShardingOptions) {
                 delegatedShardedMongoTemplateMap.put(shardHint, new CollectionShardedMongoTemplate(
-                        new SimpleMongoClientDatabaseFactory(delegatedMongoClient.get(shardHint),
+                        new SimpleMongoClientDatabaseFactory(delegatedMongoClientMap.get(shardHint),
                                 shardingOptions.resolveDatabaseName(databaseName, shardHint)),
                         ((CompositeShardingOptions) shardingOptions).getDelegatedCollectionShardingOptions()));
             } else {
                 delegatedShardedMongoTemplateMap.put(shardHint, new MongoTemplate(
-                        new SimpleMongoClientDatabaseFactory(delegatedMongoClient.get(shardHint), databaseName), null));
+                        new SimpleMongoClientDatabaseFactory(delegatedMongoClientMap.get(shardHint), databaseName), null));
             }
         });
     }

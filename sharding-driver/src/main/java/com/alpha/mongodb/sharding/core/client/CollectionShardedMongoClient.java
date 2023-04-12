@@ -10,7 +10,6 @@ import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.MongoIterable;
 import com.mongodb.connection.ClusterDescription;
-import lombok.Getter;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
@@ -23,8 +22,6 @@ import java.util.List;
  * @author Shashank Sharma
  */
 public class CollectionShardedMongoClient implements ShardedMongoClient {
-
-    @Getter
     private final CollectionShardingOptions shardingOptions;
 
     private final MongoClient delegatedMongoClient;

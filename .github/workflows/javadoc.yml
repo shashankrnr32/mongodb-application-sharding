@@ -17,4 +17,4 @@ jobs:
           java-version: 11
           project: maven
           custom-command: >
-            echo "sharding-core sharding-spring" | xargs -d " " -I % mvn -pl % -am javadoc:aggregate
+            echo "sharding-core sharding-spring sharding-driver" | xargs -d " " -I % mvn -pl % -am javadoc:aggregate
