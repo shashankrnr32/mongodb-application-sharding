@@ -199,7 +199,7 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate implement
 
     @Override
     public <T> ExecutableFind<T> query(Class<T> domainType) {
-        return getDelegatedTemplateWithoutEntityContext().query(domainType);
+        return delegatedShardedMongoTemplateMap.get(((DatabaseShardingOptions) getShardingOptions()).getDefaultDatabaseHint()).query(domainType);
     }
 
     @Override
@@ -209,7 +209,7 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate implement
 
     @Override
     public <T> ExecutableInsert<T> insert(Class<T> domainType) {
-        return getDelegatedTemplateWithoutEntityContext().insert(domainType);
+        return delegatedShardedMongoTemplateMap.get(((DatabaseShardingOptions) getShardingOptions()).getDefaultDatabaseHint()).insert(domainType);
     }
 
     @Override
@@ -285,7 +285,7 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate implement
 
     @Override
     public <T> ExecutableUpdate<T> update(Class<T> domainType) {
-        return getDelegatedTemplateWithoutEntityContext().update(domainType);
+        return delegatedShardedMongoTemplateMap.get(((DatabaseShardingOptions) getShardingOptions()).getDefaultDatabaseHint()).update(domainType);
     }
 
     @Override
@@ -360,7 +360,7 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate implement
 
     @Override
     public <T> ExecutableRemove<T> remove(Class<T> domainType) {
-        return getDelegatedTemplateWithoutEntityContext().remove(domainType);
+        return delegatedShardedMongoTemplateMap.get(((DatabaseShardingOptions) getShardingOptions()).getDefaultDatabaseHint()).remove(domainType);
     }
 
     @Override

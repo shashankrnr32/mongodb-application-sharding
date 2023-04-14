@@ -10,12 +10,16 @@ import org.springframework.core.env.Environment;
 import org.springframework.data.mongodb.ReactiveMongoDatabaseFactory;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.core.SimpleReactiveMongoDatabaseFactory;
+import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.IntStream;
 
 @Configuration
+@EnableReactiveMongoRepositories(
+        basePackages = "com.alpha.mongodb.sharding.example.repository.database.reactive",
+        reactiveMongoTemplateRef = "databaseShardedReactiveMongoTemplate")
 public class DatabaseShardedReactiveMongoConfiguration {
 
     private static final String SPRING_MONGO_DB_URI_DATABASE_SHARDED_DS0 = "spring.mongodb.sharded.database.ds0.uri";

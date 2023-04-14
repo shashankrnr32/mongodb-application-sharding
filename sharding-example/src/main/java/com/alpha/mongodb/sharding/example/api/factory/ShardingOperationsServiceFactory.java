@@ -4,7 +4,9 @@ import com.alpha.mongodb.sharding.example.api.enumeration.DataSourceType;
 import com.alpha.mongodb.sharding.example.api.enumeration.ShardingType;
 import com.alpha.mongodb.sharding.example.service.ShardedOperationsService;
 import com.alpha.mongodb.sharding.example.service.impl.repository.ReactiveRepositoryCollectionShardedOperationService;
+import com.alpha.mongodb.sharding.example.service.impl.repository.ReactiveRepositoryDatabaseShardedOperationService;
 import com.alpha.mongodb.sharding.example.service.impl.repository.RepositoryCollectionShardedOperationService;
+import com.alpha.mongodb.sharding.example.service.impl.repository.RepositoryDatabaseShardedOperationService;
 import com.alpha.mongodb.sharding.example.service.impl.template.ReactiveTemplateCollectionShardedOperationService;
 import com.alpha.mongodb.sharding.example.service.impl.template.ReactiveTemplateDatabaseShardedOperationService;
 import com.alpha.mongodb.sharding.example.service.impl.template.TemplateCollectionShardedOperationService;
@@ -26,6 +28,12 @@ public class ShardingOperationsServiceFactory {
 
     @Autowired
     private ReactiveRepositoryCollectionShardedOperationService reactiveRepositoryCollectionShardedOperationService;
+
+    @Autowired
+    private RepositoryDatabaseShardedOperationService repositoryDatabaseShardedOperationService;
+
+    @Autowired
+    private ReactiveRepositoryDatabaseShardedOperationService reactiveRepositoryDatabaseShardedOperationService;
 
     @Autowired
     private ReactiveTemplateCollectionShardedOperationService reactiveTemplateCollectionShardedOperationService;
@@ -55,6 +63,9 @@ public class ShardingOperationsServiceFactory {
                     case TEMPLATE:
                         return reactive ? reactiveTemplateDatabaseShardedOperationService :
                                 templateDatabaseShardedOperationService;
+                    case REPOSITORY:
+                        return reactive ? reactiveRepositoryDatabaseShardedOperationService :
+                                repositoryDatabaseShardedOperationService;
                     default:
                         throw new NotImplementedException();
                 }

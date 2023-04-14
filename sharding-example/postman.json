@@ -1,0 +1,112 @@
+{
+	"info": {
+		"_postman_id": "03903ff0-9709-46b0-8ecd-192197c33ba5",
+		"name": "Sharding Example Operations",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Insert",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"indexedField\": \"12-{{$randomUUID}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/sharding-example/v1/ops/insert?shardingType=DATABASE&dataSourceType=REPOSITORY&reactive=true",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"sharding-example",
+						"v1",
+						"ops",
+						"insert"
+					],
+					"query": [
+						{
+							"key": "shardingType",
+							"value": "DATABASE"
+						},
+						{
+							"key": "dataSourceType",
+							"value": "REPOSITORY"
+						},
+						{
+							"key": "reactive",
+							"value": "true"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Find by ID",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"indexedField\": \"02-{{$randomUUID}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/sharding-example/v1/ops/find/id/642909ee87d2eb0114073969?shardingType=DATABASE&dataSourceType=REPOSITORY&collectionShardHint=2&databaseShardHint=2&reactive=true",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"sharding-example",
+						"v1",
+						"ops",
+						"find",
+						"id",
+						"642909ee87d2eb0114073969"
+					],
+					"query": [
+						{
+							"key": "shardingType",
+							"value": "DATABASE"
+						},
+						{
+							"key": "dataSourceType",
+							"value": "REPOSITORY"
+						},
+						{
+							"key": "collectionShardHint",
+							"value": "2"
+						},
+						{
+							"key": "databaseShardHint",
+							"value": "2"
+						},
+						{
+							"key": "reactive",
+							"value": "true"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
