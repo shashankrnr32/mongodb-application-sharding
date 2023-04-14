@@ -209,7 +209,7 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate implement
 
     @Override
     public <T> ExecutableInsert<T> insert(Class<T> domainType) {
-        return delegatedShardedMongoTemplateMap.get(((DatabaseShardingOptions) getShardingOptions())).insert(domainType);
+        return delegatedShardedMongoTemplateMap.get(((DatabaseShardingOptions) getShardingOptions()).getDefaultDatabaseHint()).insert(domainType);
     }
 
     @Override
