@@ -1,6 +1,7 @@
 package com.alpha.mongodb.sharding.core.client;
 
 import com.alpha.mongodb.sharding.core.configuration.CollectionShardingOptions;
+import com.alpha.mongodb.sharding.core.database.CollectionShardedReactiveMongoDatabase;
 import com.mongodb.ClientSessionOptions;
 import com.mongodb.connection.ClusterDescription;
 import com.mongodb.reactivestreams.client.ChangeStreamPublisher;
@@ -14,6 +15,11 @@ import org.reactivestreams.Publisher;
 
 import java.util.List;
 
+/**
+ * Collection Sharded Reactive Mongo Client
+ *
+ * @author Shashank Sharma
+ */
 public class CollectionShardedReactiveMongoClient implements ShardedReactiveMongoClient {
     private final CollectionShardingOptions shardingOptions;
 
@@ -28,7 +34,7 @@ public class CollectionShardedReactiveMongoClient implements ShardedReactiveMong
 
     @Override
     public MongoDatabase getDatabase(String s) {
-        return delegatedMongoClient.getDatabase(s);
+        return new CollectionShardedReactiveMongoDatabase(delegatedMongoClient.getDatabase(s), shardingOptions);
     }
 
     @Override

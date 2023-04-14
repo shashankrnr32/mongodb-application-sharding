@@ -154,7 +154,7 @@ public class CollectionShardedReactiveMongoDatabase implements MongoDatabase {
 
     @Override
     public Publisher<String> listCollectionNames(ClientSession clientSession) {
-        return delegatedMongoDatabase.listCollectionNames();
+        return delegatedMongoDatabase.listCollectionNames(clientSession);
     }
 
     @Override
