@@ -9,12 +9,16 @@ import org.springframework.core.env.Environment;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory;
+import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.IntStream;
 
 @Configuration
+@EnableMongoRepositories(
+        basePackages = "com.alpha.mongodb.sharding.example.repository.database.executable",
+        mongoTemplateRef = "databaseShardedMongoTemplate")
 public class DatabaseShardedMongoConfiguration {
 
     private static final String SPRING_MONGO_DB_URI_DATABASE_SHARDED_DS0 = "spring.mongodb.sharded.database.ds0.uri";

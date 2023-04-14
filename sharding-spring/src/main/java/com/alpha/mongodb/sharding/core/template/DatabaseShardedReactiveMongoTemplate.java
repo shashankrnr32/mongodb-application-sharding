@@ -207,7 +207,7 @@ public class DatabaseShardedReactiveMongoTemplate extends ShardedReactiveMongoTe
 
     @Override
     public <T> ReactiveFind<T> query(Class<T> domainType) {
-        return getDelegatedTemplateWithoutEntityContext().query(domainType);
+        return delegatedShardedMongoTemplateMap.get(((DatabaseShardingOptions) getShardingOptions()).getDefaultDatabaseHint()).query(domainType);
     }
 
     @Override
@@ -217,7 +217,7 @@ public class DatabaseShardedReactiveMongoTemplate extends ShardedReactiveMongoTe
 
     @Override
     public <T> ReactiveInsert<T> insert(Class<T> domainType) {
-        return getDelegatedTemplateWithoutEntityContext().insert(domainType);
+        return delegatedShardedMongoTemplateMap.get(((DatabaseShardingOptions) getShardingOptions()).getDefaultDatabaseHint()).insert(domainType);
     }
 
     @Override
@@ -293,7 +293,7 @@ public class DatabaseShardedReactiveMongoTemplate extends ShardedReactiveMongoTe
 
     @Override
     public <T> ReactiveUpdate<T> update(Class<T> domainType) {
-        return getDelegatedTemplateWithoutEntityContext().update(domainType);
+        return delegatedShardedMongoTemplateMap.get(((DatabaseShardingOptions) getShardingOptions()).getDefaultDatabaseHint()).update(domainType);
     }
 
     @Override

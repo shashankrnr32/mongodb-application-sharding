@@ -16,7 +16,7 @@ import java.util.stream.IntStream;
 
 @Configuration
 @EnableMongoRepositories(
-        basePackages = "com.alpha.mongodb.sharding.example.repository.collection",
+        basePackages = "com.alpha.mongodb.sharding.example.repository.collection.executable",
         mongoTemplateRef = "collectionShardedMongoTemplate")
 public class CollectionShardedMongoConfiguration {
 
