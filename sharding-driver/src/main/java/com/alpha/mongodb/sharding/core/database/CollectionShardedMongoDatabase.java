@@ -94,7 +94,7 @@ public class CollectionShardedMongoDatabase implements MongoDatabase {
 
     @Override
     public <T> MongoCollection<T> getCollection(String s, Class<T> aClass) {
-        return delegatedMongoDatabase.getCollection(s, aClass);
+        return delegatedMongoDatabase.getCollection(resolveCollectionName(s), aClass);
     }
 
     @Override
