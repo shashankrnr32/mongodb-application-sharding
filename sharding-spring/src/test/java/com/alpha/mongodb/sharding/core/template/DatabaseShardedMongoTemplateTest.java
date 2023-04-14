@@ -527,6 +527,49 @@ public class DatabaseShardedMongoTemplateTest {
         databaseShardedMongoTemplate.updateFirst(query, basicUpdate, TestEntity3.class);
     }
 
+    @Test
+    public void testExecutables() {
+        DatabaseShardedMongoTemplate databaseShardedMongoTemplate =
+                getFixture(FixtureConfiguration.builder().registerHintResolutionCallback(true).build());
+
+        ShardingHintManager.setDatabaseHint(String.valueOf(0));
+
+        databaseShardedMongoTemplate.remove(TestEntity3.class);
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .remove(TestEntity3.class);
+
+        databaseShardedMongoTemplate.insert(TestEntity3.class);
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .insert(TestEntity3.class);
+
+        databaseShardedMongoTemplate.update(TestEntity3.class);
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .update(TestEntity3.class);
+
+        databaseShardedMongoTemplate.findAll(TestEntity3.class);
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .findAll(TestEntity3.class);
+
+        databaseShardedMongoTemplate.query(TestEntity3.class);
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .query(TestEntity3.class);
+    }
+
+    @Test
+    public void testStream() {
+        DatabaseShardedMongoTemplate databaseShardedMongoTemplate =
+                getFixture(FixtureConfiguration.builder().registerHintResolutionCallback(true).build());
+
+        Query query = new Query();
+        databaseShardedMongoTemplate.stream(query, TestEntity3.class);
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .stream(query, TestEntity3.class);
+
+        databaseShardedMongoTemplate.stream(query, TestEntity3.class, "TEST3");
+        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
+                .stream(query, TestEntity3.class, "TEST3");
+    }
+
 
     @After
     public void teardown() {
