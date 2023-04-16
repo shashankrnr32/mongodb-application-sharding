@@ -4,6 +4,7 @@ import com.mongodb.Function;
 import com.mongodb.client.ListCollectionsIterable;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoIterable;
+import org.bson.BsonValue;
 import org.bson.conversions.Bson;
 
 import java.util.Collection;
@@ -57,6 +58,16 @@ public class ListCollectionsFromDatabaseIterable implements ListCollectionsItera
 
     @Override
     public ListCollectionsIterable<String> batchSize(int i) {
+        return this;
+    }
+
+    @Override
+    public ListCollectionsIterable<String> comment(String s) {
+        return this;
+    }
+
+    @Override
+    public ListCollectionsIterable<String> comment(BsonValue bsonValue) {
         return this;
     }
 }

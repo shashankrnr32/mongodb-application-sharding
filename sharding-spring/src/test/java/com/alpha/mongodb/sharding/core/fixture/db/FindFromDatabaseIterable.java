@@ -7,6 +7,7 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoIterable;
 import com.mongodb.client.model.Collation;
+import org.bson.BsonValue;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 
@@ -126,6 +127,11 @@ public class FindFromDatabaseIterable implements FindIterable<Document> {
     }
 
     @Override
+    public FindIterable<Document> comment(BsonValue bsonValue) {
+        return this;
+    }
+
+    @Override
     public FindIterable<Document> hint(Bson bson) {
         return null;
     }
@@ -133,6 +139,11 @@ public class FindFromDatabaseIterable implements FindIterable<Document> {
     @Override
     public FindIterable<Document> hintString(String s) {
         return null;
+    }
+
+    @Override
+    public FindIterable<Document> let(Bson bson) {
+        return this;
     }
 
     @Override
