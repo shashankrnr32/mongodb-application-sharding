@@ -32,6 +32,17 @@ as a dependency to your project.
 </dependency>
 ```
 
+### Mongo DB Clients - Application built without Spring.
+
+```xml
+<!-- sharding-driver -->
+<dependency>
+    <groupId>com.alpha.mongodb</groupId>
+    <artifactId>sharding-driver</artifactId>
+    <version>${mongodb.sharding.version}</version>
+</dependency>
+```
+
 To see a sample usage of different Sharding Strategies, visit the documentation
 [here](https://shashankrnr32.gitbook.io/mongodb-application-sharding).
 
@@ -39,24 +50,23 @@ To see a sample usage of different Sharding Strategies, visit the documentation
 
 1. Supports 3 different sharding strategies for Spring / Spring Boot projects by extending MongoTemplate.
 2. Supports Reactive Mongo Templates (for all the sharding strategies)
-3. Hint Resolution through ThreadLocal and callback based mechanism.
-4. Automatic Hint Resolution Callback discovery for Spring Beans using ApplicationContext
-5. Custom configuration available for Sharding, validation of shards etc.
-6. Tested using Spring's Mongo Template and Repository
+3. Sharding support for Mongo Clients (without the need of spring dependencies). This supports both executable and
+   reactive Mongo Clients.
+4. Hint Resolution through ThreadLocal and callback based mechanism.
+5. Automatic Hint Resolution Callback discovery for Spring Beans using ApplicationContext
+6. Custom configuration available for Sharding, validation of shards etc.
+7. Tested using Spring's Mongo Template and Repository
 
 ## Roadmap
 
 This project is in its budding stage. But I do see a lot of features that can be added.
 
-1. Sharding support for Mongo Client (without the need of spring dependencies). This would support both executable and
-   reactive Mongo Clients.
-2. More customization to Sharding options to allow dynamic shards, custom validations etc.
-3. Support non-sharded collections within a sharded database.
-4. Support to query from all the shards when the library is unable to route the query to a particular shard.
-5. Configuring Sharding from property files without writing any Java Code
-6. Support Aggregation queries
-7. Custom ID generator for the sharded entities.
-8. And so much more...!
+1. More customization to Sharding options to allow dynamic shards, custom validations etc.
+2. Support non-sharded collections within a sharded database.
+3. Support to query from all the shards when the library is unable to route the query to a particular shard.
+4. Configuring Sharding from property files without writing any Java Code
+5. Support Aggregation queries
+7. And so much more...!
 
 ## Code Analysis
 
