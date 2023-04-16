@@ -25,12 +25,12 @@
         <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongodb-driver-sync</artifactId>
-            <version>${mongodb.driver.executable.version}</version>
+            <version>${mongodb.driver.version}</version>
         </dependency>
         <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongodb-driver-reactivestreams</artifactId>
-            <version>${mongodb.driver.reactive.version}</version>
+            <version>${mongodb.driver.version}</version>
         </dependency>
         <dependency>
             <groupId>io.projectreactor</groupId>
