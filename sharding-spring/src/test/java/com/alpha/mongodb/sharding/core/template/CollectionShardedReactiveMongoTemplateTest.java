@@ -19,6 +19,8 @@ import com.mongodb.reactivestreams.client.MongoCollection;
 import com.mongodb.reactivestreams.client.MongoDatabase;
 import lombok.Builder;
 import lombok.Data;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.bson.BsonObjectId;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -346,6 +348,24 @@ public class CollectionShardedReactiveMongoTemplateTest {
 
     @Test
     public void testCreateCollection() {
+        CollectionShardedReactiveMongoTemplate mongoTemplate = getFixture(FixtureConfiguration.getDefault());
+
+        MongoDatabase mockMongoDatabase = mock(MongoDatabase.class);
+        mongoDatabaseUtilsMockedStatic.when(() -> ReactiveMongoDatabaseUtils.getDatabase(eq(mongoTemplate.getMongoDatabaseFactory()), any()))
+                .thenReturn(Mono.just(mockMongoDatabase));
+        when(mockMongoDatabase.createCollection(eq("TEST3_0"), any())).thenReturn(Mono.empty());
+
+        MongoCollection<Document> mockCollection = mock(MongoCollection.class);
+        when(mockMongoDatabase.getCollection("TEST3_0"))
+                .thenReturn(mockCollection);
+
+        ShardingHintManager.setCollectionHint(String.valueOf(0));
+        mongoTemplate.createCollection(TestEntity3.class).block();
+    }
+
+    @Test
+    public void testCreateCollectionWhenLoggerDebugIsEnabled() {
+        Configurator.setLevel(CollectionShardedReactiveMongoTemplate.class.getCanonicalName(), Level.DEBUG);
         CollectionShardedReactiveMongoTemplate mongoTemplate = getFixture(FixtureConfiguration.getDefault());
 
         MongoDatabase mockMongoDatabase = mock(MongoDatabase.class);
