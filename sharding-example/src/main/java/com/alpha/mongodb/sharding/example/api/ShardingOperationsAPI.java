@@ -52,8 +52,8 @@ public class ShardingOperationsAPI {
                                     @RequestParam ShardingType shardingType,
                                     @RequestParam DataSourceType dataSourceType,
                                     @RequestParam boolean reactive) {
-        serviceFactory.get(shardingType, dataSourceType, reactive).insert(testShardedEntity);
-        return ResponseEntity.noContent().build();
+        EntityDTO persistedEntityDTO = serviceFactory.get(shardingType, dataSourceType, reactive).insert(testShardedEntity);
+        return ResponseEntity.ok(persistedEntityDTO.getId());
     }
 
 }

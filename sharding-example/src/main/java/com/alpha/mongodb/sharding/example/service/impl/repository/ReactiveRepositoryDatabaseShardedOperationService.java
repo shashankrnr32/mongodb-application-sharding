@@ -29,7 +29,7 @@ public class ReactiveRepositoryDatabaseShardedOperationService implements Sharde
     }
 
     @Override
-    public void insert(EntityDTO entity) {
-        databaseShardedEntityReactiveRepository.insert(entity.toEntity()).block();
+    public EntityDTO insert(EntityDTO entity) {
+        return databaseShardedEntityReactiveRepository.insert(entity.toEntity()).block().toDTO();
     }
 }

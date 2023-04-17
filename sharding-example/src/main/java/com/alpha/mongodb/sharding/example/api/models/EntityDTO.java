@@ -5,6 +5,7 @@ import lombok.Data;
 
 @Data
 public class EntityDTO {
+    private String id;
     private String indexedField;
 
     public TestShardedEntity toEntity() {

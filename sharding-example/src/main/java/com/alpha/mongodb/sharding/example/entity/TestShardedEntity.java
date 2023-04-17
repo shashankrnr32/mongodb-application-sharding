@@ -34,6 +34,7 @@ public class TestShardedEntity implements CollectionShardedEntity, DatabaseShard
     public EntityDTO toDTO() {
         EntityDTO entityDTO = new EntityDTO();
         entityDTO.setIndexedField(indexedField);
+        entityDTO.setId(id);
         return entityDTO;
     }
 }

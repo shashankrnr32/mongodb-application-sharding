@@ -10,5 +10,5 @@ public interface ShardedOperationsService {
 
     Optional<EntityDTO> findByIndexedField(String indexedFieldValue);
 
-    void insert(EntityDTO entity);
+    EntityDTO insert(EntityDTO entity);
 }

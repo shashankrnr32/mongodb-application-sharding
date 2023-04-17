@@ -26,7 +26,7 @@ public class RepositoryDatabaseShardedOperationService implements ShardedOperati
     }
 
     @Override
-    public void insert(EntityDTO entity) {
-        databaseShardedEntityRepository.insert(entity.toEntity());
+    public EntityDTO insert(EntityDTO entity) {
+        return databaseShardedEntityRepository.insert(entity.toEntity()).toDTO();
     }
 }

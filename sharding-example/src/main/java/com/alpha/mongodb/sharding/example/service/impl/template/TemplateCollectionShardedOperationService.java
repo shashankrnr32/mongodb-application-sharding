@@ -32,7 +32,7 @@ public class TemplateCollectionShardedOperationService implements ShardedOperati
     }
 
     @Override
-    public void insert(EntityDTO entity) {
-        collectionShardedEntityMongoTemplate.insert(entity.toEntity());
+    public EntityDTO insert(EntityDTO entity) {
+        return collectionShardedEntityMongoTemplate.insert(entity.toEntity()).toDTO();
     }
 }

@@ -29,7 +29,7 @@ public class ReactiveRepositoryCollectionShardedOperationService implements Shar
     }
 
     @Override
-    public void insert(EntityDTO entity) {
-        collectionShardedEntityReactiveRepository.insert(entity.toEntity()).block();
+    public EntityDTO insert(EntityDTO entity) {
+        return collectionShardedEntityReactiveRepository.insert(entity.toEntity()).block().toDTO();
     }
 }
