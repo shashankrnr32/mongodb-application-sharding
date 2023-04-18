@@ -10,4 +10,6 @@ public interface DatabaseShardedEntityReactiveRepository extends ReactiveMongoRe
 
     Mono<TestShardedEntity> findByIndexedField(String indexedField);
 
+    Mono<Void> deleteByIndexedField(String indexedField);
+
 }

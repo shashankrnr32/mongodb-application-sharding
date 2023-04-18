@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -54,6 +55,36 @@ public class ShardingOperationsAPI {
                                     @RequestParam boolean reactive) {
         EntityDTO persistedEntityDTO = serviceFactory.get(shardingType, dataSourceType, reactive).insert(testShardedEntity);
         return ResponseEntity.ok(persistedEntityDTO.getId());
+    }
+
+    @DeleteMapping(path = "/delete/id/{id}")
+    public ResponseEntity<?> deleteById(@PathVariable String id,
+                                        @RequestParam ShardingType shardingType,
+                                        @RequestParam @Nullable String collectionShardHint,
+                                        @RequestParam @Nullable String databaseShardHint,
+                                        @RequestParam DataSourceType dataSourceType,
+                                        @RequestParam boolean reactive) {
+        if (StringUtils.isNotBlank(collectionShardHint)) {
+            ShardingHintManager.setCollectionHint(collectionShardHint);
+            ShardingHintManager.setDatabaseHint(databaseShardHint);
+        }
+        serviceFactory.get(shardingType, dataSourceType, reactive).deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping(path = "/delete/indexed/{value}")
+    public ResponseEntity<?> deleteByIndexedField(@PathVariable String value,
+                                                  @RequestParam ShardingType shardingType,
+                                                  @RequestParam @Nullable String collectionShardHint,
+                                                  @RequestParam @Nullable String databaseShardHint,
+                                                  @RequestParam DataSourceType dataSourceType,
+                                                  @RequestParam boolean reactive) {
+        if (StringUtils.isNotBlank(collectionShardHint)) {
+            ShardingHintManager.setCollectionHint(collectionShardHint);
+            ShardingHintManager.setDatabaseHint(databaseShardHint);
+        }
+        serviceFactory.get(shardingType, dataSourceType, reactive).deleteByIndexedField(value);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping(path = "/find/indexed/{value}")

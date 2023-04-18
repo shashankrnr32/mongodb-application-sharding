@@ -33,4 +33,14 @@ public class ReactiveRepositoryDatabaseShardedOperationService implements Sharde
     public EntityDTO insert(EntityDTO entity) {
         return databaseShardedEntityReactiveRepository.insert(entity.toEntity()).map(TestShardedEntity::toDTO).block();
     }
+
+    @Override
+    public void deleteByIndexedField(String indexedField) {
+        databaseShardedEntityReactiveRepository.deleteByIndexedField(indexedField);
+    }
+
+    @Override
+    public void deleteById(String id) {
+        databaseShardedEntityReactiveRepository.deleteById(id).block();
+    }
 }
