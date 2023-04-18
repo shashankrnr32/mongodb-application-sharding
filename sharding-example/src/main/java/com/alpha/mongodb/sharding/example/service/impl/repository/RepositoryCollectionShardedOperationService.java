@@ -26,7 +26,7 @@ public class RepositoryCollectionShardedOperationService implements ShardedOpera
     }
 
     @Override
-    public void insert(EntityDTO entity) {
-        collectionShardedEntityRepository.insert(entity.toEntity());
+    public EntityDTO insert(EntityDTO entity) {
+        return collectionShardedEntityRepository.insert(entity.toEntity()).toDTO();
     }
 }

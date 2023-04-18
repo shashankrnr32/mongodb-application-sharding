@@ -22,6 +22,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.MockedStatic;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.data.mapping.context.MappingContext;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.data.mongodb.MongoDatabaseUtils;
 import org.springframework.data.mongodb.core.MongoExceptionTranslator;
@@ -30,6 +31,7 @@ import org.springframework.data.mongodb.core.convert.MongoConverter;
 import org.springframework.data.mongodb.core.query.BasicUpdate;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.UpdateDefinition;
+import org.springframework.data.projection.ProjectionFactory;
 
 import java.util.Collections;
 import java.util.List;
@@ -81,8 +83,11 @@ public class CollectionShardedMongoTemplateTest {
         MongoDatabaseFactory databaseFactory = mock(MongoDatabaseFactory.class);
         when(databaseFactory.getExceptionTranslator()).thenReturn(new MongoExceptionTranslator());
 
+        MongoConverter mockMongoConverter = mock(MongoConverter.class);
+        when(mockMongoConverter.getProjectionFactory()).thenReturn(mock(ProjectionFactory.class));
+        when(mockMongoConverter.getMappingContext()).thenReturn(mock(MappingContext.class));
         CollectionShardedMongoTemplate collectionShardedMongoTemplate =
-                new CollectionShardedMongoTemplate(databaseFactory, mock(MongoConverter.class), collectionShardingOptions);
+                new CollectionShardedMongoTemplate(databaseFactory, mockMongoConverter, collectionShardingOptions);
         assertEquals(collectionShardingOptions, collectionShardedMongoTemplate.getShardingOptions());
         assertNotNull(collectionShardedMongoTemplate);
     }

@@ -22,11 +22,11 @@ public class RepositoryDatabaseShardedOperationService implements ShardedOperati
 
     @Override
     public Optional<EntityDTO> findByIndexedField(String indexedFieldValue) {
-        return databaseShardedEntityRepository.findByIndexedField(indexedFieldValue).map(TestShardedEntity::toDTO);
+        return databaseShardedEntityRepository.findOneByIndexedField(indexedFieldValue).map(TestShardedEntity::toDTO);
     }
 
     @Override
-    public void insert(EntityDTO entity) {
-        databaseShardedEntityRepository.insert(entity.toEntity());
+    public EntityDTO insert(EntityDTO entity) {
+        return databaseShardedEntityRepository.insert(entity.toEntity()).toDTO();
     }
 }

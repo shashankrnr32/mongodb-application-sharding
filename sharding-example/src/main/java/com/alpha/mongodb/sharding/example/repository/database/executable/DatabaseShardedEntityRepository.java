@@ -9,6 +9,6 @@ import java.util.Optional;
 @Repository
 public interface DatabaseShardedEntityRepository extends MongoRepository<TestShardedEntity, String> {
 
-    Optional<TestShardedEntity> findByIndexedField(String indexedField);
+    Optional<TestShardedEntity> findOneByIndexedField(String indexedField);
 
 }

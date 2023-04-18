@@ -25,11 +25,12 @@ public class ReactiveRepositoryDatabaseShardedOperationService implements Sharde
     public Optional<EntityDTO> findByIndexedField(String indexedFieldValue) {
         return databaseShardedEntityReactiveRepository
                 .findByIndexedField(indexedFieldValue)
-                .map(entityOptional -> entityOptional.map(TestShardedEntity::toDTO)).block();
+                .map(entity -> Optional.ofNullable(entity.toDTO()))
+                .onErrorReturn(Optional.empty()).block();
     }
 
     @Override
-    public void insert(EntityDTO entity) {
-        databaseShardedEntityReactiveRepository.insert(entity.toEntity()).block();
+    public EntityDTO insert(EntityDTO entity) {
+        return databaseShardedEntityReactiveRepository.insert(entity.toEntity()).map(TestShardedEntity::toDTO).block();
     }
 }

@@ -6,6 +6,7 @@ import com.alpha.mongodb.sharding.core.exception.UnresolvableCollectionShardExce
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.CountOptions;
+import com.mongodb.client.model.CreateCollectionOptions;
 import com.mongodb.client.model.EstimatedDocumentCountOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
@@ -140,8 +141,8 @@ public class CollectionShardedMongoTemplate extends ShardedMongoTemplate impleme
     }
 
     @Override
-    protected MongoCollection<Document> doCreateCollection(String collectionName, Document collectionOptions) {
-        return super.doCreateCollection(resolveCollectionNameWithoutEntityContext(collectionName), collectionOptions);
+    protected MongoCollection<Document> doCreateCollection(String collectionName, CreateCollectionOptions createCollectionOptions) {
+        return super.doCreateCollection(resolveCollectionNameWithoutEntityContext(collectionName), createCollectionOptions);
     }
 
     @Override

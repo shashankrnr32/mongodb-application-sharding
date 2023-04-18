@@ -12,6 +12,7 @@ import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.junit.After;
 import org.junit.Test;
+import org.springframework.data.mapping.context.MappingContext;
 import org.springframework.data.mongodb.ReactiveMongoDatabaseFactory;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.FindAndReplaceOptions;
@@ -21,6 +22,7 @@ import org.springframework.data.mongodb.core.convert.MongoConverter;
 import org.springframework.data.mongodb.core.query.BasicUpdate;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.UpdateDefinition;
+import org.springframework.data.projection.ProjectionFactory;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -88,8 +90,11 @@ public class DatabaseShardedReactiveMongoTemplateTest {
         shardedDatabaseFactoryMap.put(String.valueOf(1), databaseFactory1);
         shardedDatabaseFactoryMap.put(String.valueOf(2), databaseFactory2);
 
+        MongoConverter mockMongoConverter = mock(MongoConverter.class);
+        when(mockMongoConverter.getProjectionFactory()).thenReturn(mock(ProjectionFactory.class));
+        when(mockMongoConverter.getMappingContext()).thenReturn(mock(MappingContext.class));
         DatabaseShardedReactiveMongoTemplate databaseShardedMongoTemplate =
-                new DatabaseShardedReactiveMongoTemplate(shardedDatabaseFactoryMap, mock(MongoConverter.class), databaseShardingOptions);
+                new DatabaseShardedReactiveMongoTemplate(shardedDatabaseFactoryMap, mockMongoConverter, databaseShardingOptions);
         assertEquals(databaseShardingOptions, databaseShardedMongoTemplate.getShardingOptions());
         assertNotNull(databaseShardedMongoTemplate);
     }

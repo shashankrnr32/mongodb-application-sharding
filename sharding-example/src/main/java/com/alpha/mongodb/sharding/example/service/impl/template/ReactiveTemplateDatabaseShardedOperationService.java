@@ -32,7 +32,7 @@ public class ReactiveTemplateDatabaseShardedOperationService implements ShardedO
     }
 
     @Override
-    public void insert(EntityDTO entity) {
-        databaseShardedEntityReactiveMongoTemplate.insert(entity.toEntity()).block();
+    public EntityDTO insert(EntityDTO entity) {
+        return databaseShardedEntityReactiveMongoTemplate.insert(entity.toEntity()).map(TestShardedEntity::toDTO).block();
     }
 }
