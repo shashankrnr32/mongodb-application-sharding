@@ -7,14 +7,17 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.data.mapping.context.MappingContext;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.data.mongodb.core.MongoExceptionTranslator;
 import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
+import org.springframework.data.projection.ProjectionFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.IntStream;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -59,6 +62,9 @@ public class CompositeShardedMongoTemplateTest {
         delegatedDatabaseFactory.put(String.valueOf(0), mongoDatabaseFactory);
         delegatedDatabaseFactory.put(String.valueOf(1), mongoDatabaseFactory);
         delegatedDatabaseFactory.put(String.valueOf(2), mongoDatabaseFactory);
+
+        when(mappingMongoConverter.getProjectionFactory()).thenReturn(mock(ProjectionFactory.class));
+        when(mappingMongoConverter.getMappingContext()).thenReturn(mock(MappingContext.class));
         compositeShardedMongoTemplate = new CompositeShardedMongoTemplate(delegatedDatabaseFactory, mappingMongoConverter, compositeShardingOptions);
     }
 

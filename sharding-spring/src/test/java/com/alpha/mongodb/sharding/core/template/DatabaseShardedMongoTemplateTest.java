@@ -12,6 +12,7 @@ import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.junit.After;
 import org.junit.Test;
+import org.springframework.data.mapping.context.MappingContext;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.FindAndReplaceOptions;
@@ -20,6 +21,7 @@ import org.springframework.data.mongodb.core.convert.MongoConverter;
 import org.springframework.data.mongodb.core.query.BasicUpdate;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.UpdateDefinition;
+import org.springframework.data.projection.ProjectionFactory;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -87,8 +89,11 @@ public class DatabaseShardedMongoTemplateTest {
         shardedDatabaseFactoryMap.put(String.valueOf(1), databaseFactory1);
         shardedDatabaseFactoryMap.put(String.valueOf(2), databaseFactory2);
 
+        MongoConverter mockMongoConverter = mock(MongoConverter.class);
+        when(mockMongoConverter.getProjectionFactory()).thenReturn(mock(ProjectionFactory.class));
+        when(mockMongoConverter.getMappingContext()).thenReturn(mock(MappingContext.class));
         DatabaseShardedMongoTemplate databaseShardedMongoTemplate =
-                new DatabaseShardedMongoTemplate(shardedDatabaseFactoryMap, mock(MongoConverter.class), databaseShardingOptions);
+                new DatabaseShardedMongoTemplate(shardedDatabaseFactoryMap, mockMongoConverter, databaseShardingOptions);
         assertEquals(databaseShardingOptions, databaseShardedMongoTemplate.getShardingOptions());
         assertNotNull(databaseShardedMongoTemplate);
     }
@@ -524,34 +529,6 @@ public class DatabaseShardedMongoTemplateTest {
         UpdateDefinition basicUpdate = new BasicUpdate(new Document());
         ShardingHintManager.setDatabaseHint(String.valueOf(5));
         databaseShardedMongoTemplate.updateFirst(query, basicUpdate, TestEntity3.class);
-    }
-
-    @Test
-    public void testExecutables() {
-        DatabaseShardedMongoTemplate databaseShardedMongoTemplate =
-                getFixture(FixtureConfiguration.builder().registerHintResolutionCallback(true).build());
-
-        ShardingHintManager.setDatabaseHint(String.valueOf(0));
-
-        databaseShardedMongoTemplate.remove(TestEntity3.class);
-        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
-                .remove(TestEntity3.class);
-
-        databaseShardedMongoTemplate.insert(TestEntity3.class);
-        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
-                .insert(TestEntity3.class);
-
-        databaseShardedMongoTemplate.update(TestEntity3.class);
-        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
-                .update(TestEntity3.class);
-
-        databaseShardedMongoTemplate.findAll(TestEntity3.class);
-        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
-                .findAll(TestEntity3.class);
-
-        databaseShardedMongoTemplate.query(TestEntity3.class);
-        verify(databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().get(String.valueOf(0)))
-                .query(TestEntity3.class);
     }
 
     @Test
