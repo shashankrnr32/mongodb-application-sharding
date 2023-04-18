@@ -33,6 +33,6 @@ public class ReactiveTemplateCollectionShardedOperationService implements Sharde
 
     @Override
     public EntityDTO insert(EntityDTO entity) {
-        return collectionShardedEntityReactiveMongoTemplate.insert(entity.toEntity()).block().toDTO();
+        return collectionShardedEntityReactiveMongoTemplate.insert(entity.toEntity()).map(TestShardedEntity::toDTO).block();
     }
 }
