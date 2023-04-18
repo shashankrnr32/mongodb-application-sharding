@@ -165,6 +165,61 @@
 		},
 		{
 			"name": "Find by Indexed Field",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"indexedField\": \"02-{{$randomUUID}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/sharding-example/v1/ops/delete/indexed/22-c51e8d59-0468-4556-ba0d-38d20d1f4adf?shardingType=DATABASE&dataSourceType=REPOSITORY&collectionShardHint=2&databaseShardHint=2&reactive=false",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"sharding-example",
+						"v1",
+						"ops",
+						"delete",
+						"indexed",
+						"22-c51e8d59-0468-4556-ba0d-38d20d1f4adf"
+					],
+					"query": [
+						{
+							"key": "shardingType",
+							"value": "DATABASE"
+						},
+						{
+							"key": "dataSourceType",
+							"value": "REPOSITORY"
+						},
+						{
+							"key": "collectionShardHint",
+							"value": "2"
+						},
+						{
+							"key": "databaseShardHint",
+							"value": "2"
+						},
+						{
+							"key": "reactive",
+							"value": "false"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete by Indexed Field",
 			"protocolProfileBehavior": {
 				"disableBodyPruning": true
 			},
