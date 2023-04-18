@@ -5,5 +5,6 @@ com.alpha.mongodb.sharding.core.configuration
 com.alpha.mongodb.sharding.core.database
 com.alpha.mongodb.sharding.core.entity
 com.alpha.mongodb.sharding.core.exception
+com.alpha.mongodb.sharding.core.executable
 com.alpha.mongodb.sharding.core.hint
 com.alpha.mongodb.sharding.core.template
