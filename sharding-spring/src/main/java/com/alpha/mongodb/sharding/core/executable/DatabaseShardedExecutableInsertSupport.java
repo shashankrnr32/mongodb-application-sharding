@@ -41,10 +41,6 @@ public class DatabaseShardedExecutableInsertSupport<T> implements
     @Getter
     private final DatabaseShardingOptions shardingOptions;
 
-    /*
-     * (non-Javadoc)
-     * @see org.springframework.data.mongodb.core.ExecutableInsertOperation.TerminatingInsert#insert(java.lang.Class)
-     */
     @Override
     public T one(T object) {
         Assert.notNull(object, "Object must not be null!");

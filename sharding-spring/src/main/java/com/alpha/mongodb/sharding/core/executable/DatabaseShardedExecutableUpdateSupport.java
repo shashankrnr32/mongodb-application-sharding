@@ -45,10 +45,6 @@ public class DatabaseShardedExecutableUpdateSupport<T>
     @Getter
     private final DatabaseShardingOptions shardingOptions;
 
-    /*
-     * (non-Javadoc)
-     * @see org.springframework.data.mongodb.core.ExecutableUpdateOperation.UpdateWithUpdate#apply(org.springframework.data.mongodb.core.query.UpdateDefinition)
-     */
     @Override
     public ExecutableUpdateOperation.TerminatingUpdate<T> apply(UpdateDefinition update) {
 
@@ -110,19 +106,11 @@ public class DatabaseShardedExecutableUpdateSupport<T>
         return doUpdate(false, false);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.springframework.data.mongodb.core.ExecutableUpdateOperation.TerminatingUpdate#upsert()
-     */
     @Override
     public UpdateResult upsert() {
         return doUpdate(true, true);
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.springframework.data.mongodb.core.ExecutableUpdateOperation.TerminatingFindAndModify#findAndModifyValue()
-     */
     @Override
     public @Nullable
     T findAndModifyValue() {
@@ -132,10 +120,6 @@ public class DatabaseShardedExecutableUpdateSupport<T>
                 getCollectionName(extendedMongoTemplate));
     }
 
-    /*
-     * (non-Javadoc)
-     * @see org.springframework.data.mongodb.core.ExecutableUpdateOperation.TerminatingFindAndReplace#findAndReplaceValue()
-     */
     @Override
     public @Nullable
     T findAndReplaceValue() {
