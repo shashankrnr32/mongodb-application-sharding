@@ -9,7 +9,6 @@ import lombok.Getter;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
 
 import java.util.Set;
@@ -19,7 +18,7 @@ import java.util.Set;
  *
  * @author Shashank Sharma
  */
-public abstract class ShardedMongoTemplate extends MongoTemplate implements ShardingAssistant {
+public abstract class ShardedMongoTemplate extends ExtendedMongoTemplate implements ShardingAssistant {
 
     @Getter
     private final ShardingOptions shardingOptions;

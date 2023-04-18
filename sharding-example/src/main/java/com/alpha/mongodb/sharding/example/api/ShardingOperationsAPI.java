@@ -56,4 +56,23 @@ public class ShardingOperationsAPI {
         return ResponseEntity.ok(persistedEntityDTO.getId());
     }
 
+    @GetMapping(path = "/find/indexed/{value}")
+    public ResponseEntity<?> findByIndexedField(@PathVariable String value,
+                                                @RequestParam @Nullable String collectionShardHint,
+                                                @RequestParam @Nullable String databaseShardHint,
+                                                @RequestParam ShardingType shardingType,
+                                                @RequestParam DataSourceType dataSourceType,
+                                                @RequestParam boolean reactive) {
+        if (StringUtils.isNotBlank(collectionShardHint)) {
+            ShardingHintManager.setCollectionHint(collectionShardHint);
+            ShardingHintManager.setDatabaseHint(databaseShardHint);
+        }
+        Optional<?> entityOptional = serviceFactory.get(shardingType, dataSourceType, reactive).findByIndexedField(value);
+        if (entityOptional.isPresent()) {
+            return ResponseEntity.ok(entityOptional);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
 }

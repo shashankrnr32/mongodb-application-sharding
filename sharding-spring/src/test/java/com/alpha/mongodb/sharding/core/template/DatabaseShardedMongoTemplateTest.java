@@ -16,7 +16,6 @@ import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.FindAndReplaceOptions;
 import org.springframework.data.mongodb.core.MongoExceptionTranslator;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
 import org.springframework.data.mongodb.core.query.BasicUpdate;
 import org.springframework.data.mongodb.core.query.Query;
@@ -604,9 +603,9 @@ public class DatabaseShardedMongoTemplateTest {
         assertEquals(databaseShardingOptions, databaseShardedMongoTemplate.getShardingOptions());
         assertNotNull(databaseShardedMongoTemplate);
 
-        MongoTemplate mongoTemplate0 = mock(MongoTemplate.class);
-        MongoTemplate mongoTemplate1 = mock(MongoTemplate.class);
-        MongoTemplate mongoTemplate2 = mock(MongoTemplate.class);
+        ExtendedMongoTemplate mongoTemplate0 = mock(ExtendedMongoTemplate.class);
+        ExtendedMongoTemplate mongoTemplate1 = mock(ExtendedMongoTemplate.class);
+        ExtendedMongoTemplate mongoTemplate2 = mock(ExtendedMongoTemplate.class);
 
         databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().put(String.valueOf(0), mongoTemplate0);
         databaseShardedMongoTemplate.getDelegatedShardedMongoTemplateMap().put(String.valueOf(1), mongoTemplate1);

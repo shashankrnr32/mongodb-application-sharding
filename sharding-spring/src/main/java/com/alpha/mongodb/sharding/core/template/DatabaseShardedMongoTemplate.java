@@ -4,6 +4,10 @@ import com.alpha.mongodb.sharding.core.assitant.DatabaseShardingAssistant;
 import com.alpha.mongodb.sharding.core.configuration.CompositeShardingOptions;
 import com.alpha.mongodb.sharding.core.configuration.DatabaseShardingOptions;
 import com.alpha.mongodb.sharding.core.exception.UnresolvableDatabaseShardException;
+import com.alpha.mongodb.sharding.core.executable.DatabaseShardedExecutableFindSupport;
+import com.alpha.mongodb.sharding.core.executable.DatabaseShardedExecutableInsertSupport;
+import com.alpha.mongodb.sharding.core.executable.DatabaseShardedExecutableRemoveSupport;
+import com.alpha.mongodb.sharding.core.executable.DatabaseShardedExecutableUpdateSupport;
 import com.alpha.mongodb.sharding.core.hint.ShardingHint;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.result.DeleteResult;
@@ -13,7 +17,6 @@ import org.bson.Document;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.FindAndReplaceOptions;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory;
 import org.springframework.data.mongodb.core.convert.MongoConverter;
 import org.springframework.data.mongodb.core.query.Query;
@@ -34,10 +37,12 @@ import java.util.stream.Collectors;
  *
  * @author Shashank Sharma
  */
-public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate implements DatabaseShardingAssistant<MongoTemplate> {
+public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate implements DatabaseShardingAssistant<ExtendedMongoTemplate> {
 
     @Getter
-    private final Map<String, MongoTemplate> delegatedShardedMongoTemplateMap = new HashMap<>();
+    private final Map<String, ExtendedMongoTemplate> delegatedShardedMongoTemplateMap = new HashMap<>();
+
+    private static final Query ALL_QUERY = new Query();
 
     public DatabaseShardedMongoTemplate(Map<String, MongoClient> delegatedMongoClientMap, String databaseName, DatabaseShardingOptions shardingOptions) {
         super(delegatedMongoClientMap.get(shardingOptions.getDefaultDatabaseHint()),
@@ -49,7 +54,7 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate implement
                                 shardingOptions.resolveDatabaseName(databaseName, shardHint)),
                         ((CompositeShardingOptions) shardingOptions).getDelegatedCollectionShardingOptions()));
             } else {
-                delegatedShardedMongoTemplateMap.put(shardHint, new MongoTemplate(
+                delegatedShardedMongoTemplateMap.put(shardHint, new ExtendedMongoTemplate(
                         new SimpleMongoClientDatabaseFactory(delegatedMongoClientMap.get(shardHint), databaseName), null));
             }
         });
@@ -67,7 +72,7 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate implement
                         delegatedDatabaseFactory.get(shardHint),
                         ((CompositeShardingOptions) shardingOptions).getDelegatedCollectionShardingOptions()));
             } else {
-                delegatedShardedMongoTemplateMap.put(shardHint, new MongoTemplate(delegatedDatabaseFactory.get(shardHint), null));
+                delegatedShardedMongoTemplateMap.put(shardHint, new ExtendedMongoTemplate(delegatedDatabaseFactory.get(shardHint), null));
             }
         });
     }
@@ -81,7 +86,7 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate implement
                         mongoConverter,
                         ((CompositeShardingOptions) shardingOptions).getDelegatedCollectionShardingOptions()));
             } else {
-                delegatedShardedMongoTemplateMap.put(shardHint, new MongoTemplate(delegatedDatabaseFactory.get(shardHint), mongoConverter));
+                delegatedShardedMongoTemplateMap.put(shardHint, new ExtendedMongoTemplate(delegatedDatabaseFactory.get(shardHint), mongoConverter));
             }
 
         });
@@ -198,18 +203,8 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate implement
     }
 
     @Override
-    public <T> ExecutableFind<T> query(Class<T> domainType) {
-        return delegatedShardedMongoTemplateMap.get(((DatabaseShardingOptions) getShardingOptions()).getDefaultDatabaseHint()).query(domainType);
-    }
-
-    @Override
     public <T> T insert(T objectToSave) {
         return getDelegatedTemplateForSaveContext(objectToSave).insert(objectToSave);
-    }
-
-    @Override
-    public <T> ExecutableInsert<T> insert(Class<T> domainType) {
-        return delegatedShardedMongoTemplateMap.get(((DatabaseShardingOptions) getShardingOptions()).getDefaultDatabaseHint()).insert(domainType);
     }
 
     @Override
@@ -284,11 +279,6 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate implement
     }
 
     @Override
-    public <T> ExecutableUpdate<T> update(Class<T> domainType) {
-        return delegatedShardedMongoTemplateMap.get(((DatabaseShardingOptions) getShardingOptions()).getDefaultDatabaseHint()).update(domainType);
-    }
-
-    @Override
     public UpdateResult updateFirst(Query query, UpdateDefinition update, Class<?> entityClass) {
         return getDelegatedTemplateForUpdateContext(entityClass, query, update).updateFirst(query, update, entityClass);
     }
@@ -359,11 +349,6 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate implement
     }
 
     @Override
-    public <T> ExecutableRemove<T> remove(Class<T> domainType) {
-        return delegatedShardedMongoTemplateMap.get(((DatabaseShardingOptions) getShardingOptions()).getDefaultDatabaseHint()).remove(domainType);
-    }
-
-    @Override
     public <T> T save(T objectToSave) {
         return getDelegatedTemplateForSaveContext(objectToSave).save(objectToSave);
     }
@@ -411,5 +396,33 @@ public class DatabaseShardedMongoTemplate extends ShardedMongoTemplate implement
     @Override
     public <T> List<T> findDistinct(Query query, String field, String collectionName, Class<?> entityClass, Class<T> resultClass) {
         return getDelegatedTemplateForFindContext(entityClass, query).findDistinct(query, field, collectionName, entityClass, resultClass);
+    }
+
+    @Override
+    public <T> ExecutableFind<T> query(Class<T> domainType) {
+        return new DatabaseShardedExecutableFindSupport<>(
+                delegatedShardedMongoTemplateMap, domainType, domainType, null, ALL_QUERY, getHintResolutionCallbacks(),
+                (DatabaseShardingOptions) getShardingOptions());
+    }
+
+    @Override
+    public <T> ExecutableRemove<T> remove(Class<T> domainType) {
+        return new DatabaseShardedExecutableRemoveSupport<>(
+                delegatedShardedMongoTemplateMap, domainType, null, ALL_QUERY, getHintResolutionCallbacks(),
+                (DatabaseShardingOptions) getShardingOptions());
+    }
+
+    @Override
+    public <T> ExecutableUpdate<T> update(Class<T> domainType) {
+        return new DatabaseShardedExecutableUpdateSupport<>(
+                delegatedShardedMongoTemplateMap, domainType, ALL_QUERY, null, null, null, null, null, domainType,
+                getHintResolutionCallbacks(), (DatabaseShardingOptions) getShardingOptions());
+    }
+
+    @Override
+    public <T> ExecutableInsert<T> insert(Class<T> domainType) {
+        return new DatabaseShardedExecutableInsertSupport<>(
+                delegatedShardedMongoTemplateMap, domainType, null, null, getHintResolutionCallbacks(),
+                (DatabaseShardingOptions) getShardingOptions());
     }
 }

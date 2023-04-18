@@ -25,7 +25,8 @@ public class ReactiveRepositoryCollectionShardedOperationService implements Shar
     public Optional<EntityDTO> findByIndexedField(String indexedFieldValue) {
         return collectionShardedEntityReactiveRepository
                 .findByIndexedField(indexedFieldValue)
-                .map(entityOptional -> entityOptional.map(TestShardedEntity::toDTO)).block();
+                .map(entity -> Optional.ofNullable(entity.toDTO()))
+                .onErrorReturn(Optional.empty()).block();
     }
 
     @Override
