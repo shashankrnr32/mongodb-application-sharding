@@ -35,4 +35,14 @@ public class TemplateDatabaseShardedOperationService implements ShardedOperation
     public EntityDTO insert(EntityDTO entity) {
         return databaseShardedEntityMongoTemplate.insert(entity.toEntity()).toDTO();
     }
+
+    @Override
+    public void deleteByIndexedField(String indexedField) {
+        databaseShardedEntityMongoTemplate.remove(indexedFieldQuery(indexedField), TestShardedEntity.class);
+    }
+
+    @Override
+    public void deleteById(String id) {
+        databaseShardedEntityMongoTemplate.remove(idQuery(id));
+    }
 }

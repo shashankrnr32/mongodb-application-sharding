@@ -11,4 +11,6 @@ public interface CollectionShardedEntityRepository extends MongoRepository<TestS
 
     Optional<TestShardedEntity> findByIndexedField(String indexedField);
 
+    void deleteByIndexedField(String indexedField);
+
 }

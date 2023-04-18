@@ -35,4 +35,14 @@ public class ReactiveTemplateCollectionShardedOperationService implements Sharde
     public EntityDTO insert(EntityDTO entity) {
         return collectionShardedEntityReactiveMongoTemplate.insert(entity.toEntity()).map(TestShardedEntity::toDTO).block();
     }
+
+    @Override
+    public void deleteByIndexedField(String indexedField) {
+        collectionShardedEntityReactiveMongoTemplate.remove(indexedFieldQuery(indexedField), TestShardedEntity.class);
+    }
+
+    @Override
+    public void deleteById(String id) {
+        collectionShardedEntityReactiveMongoTemplate.remove(idQuery(id), TestShardedEntity.class).block();
+    }
 }

@@ -33,4 +33,14 @@ public class ReactiveRepositoryCollectionShardedOperationService implements Shar
     public EntityDTO insert(EntityDTO entity) {
         return collectionShardedEntityReactiveRepository.insert(entity.toEntity()).map(TestShardedEntity::toDTO).block();
     }
+
+    @Override
+    public void deleteByIndexedField(String indexedField) {
+        collectionShardedEntityReactiveRepository.deleteByIndexedField(indexedField).block();
+    }
+
+    @Override
+    public void deleteById(String id) {
+        collectionShardedEntityReactiveRepository.deleteById(id).block();
+    }
 }

@@ -29,4 +29,14 @@ public class RepositoryDatabaseShardedOperationService implements ShardedOperati
     public EntityDTO insert(EntityDTO entity) {
         return databaseShardedEntityRepository.insert(entity.toEntity()).toDTO();
     }
+
+    @Override
+    public void deleteByIndexedField(String indexedField) {
+        databaseShardedEntityRepository.deleteByIndexedField(indexedField);
+    }
+
+    @Override
+    public void deleteById(String id) {
+        databaseShardedEntityRepository.deleteById(id);
+    }
 }
